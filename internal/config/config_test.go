@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/model"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +21,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 	tests := []struct {
 		name        string
-		expected    *Configuration
+		expected    *model.Configuration
 		filePath    string
 		envVars     env
 		expectedErr string
@@ -28,11 +30,11 @@ func TestLoadConfig(t *testing.T) {
 			name:     "Successfully load .env file",
 			filePath: "../..",
 			envVars:  envVars,
-			expected: &Configuration{
-				Consumer: ConsumerConfig{
+			expected: &model.Configuration{
+				Consumer: model.ConsumerConfig{
 					BaseUrl: "localhost:8000",
 				},
-				Database: DatabaseConfig{
+				Database: model.DatabaseConfig{
 					Username: "test_username",
 					Password: "test_password",
 					Host:     "localhost",

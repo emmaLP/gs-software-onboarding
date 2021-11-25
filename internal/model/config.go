@@ -1,4 +1,13 @@
-package config
+package model
+
+type Configuration struct {
+	Consumer ConsumerConfig `mapstructure:",squash"`
+	Database DatabaseConfig `mapstructure:",squash"`
+}
+
+type ConsumerConfig struct {
+	BaseUrl string `mapstructure:"base_url"`
+}
 
 type DatabaseConfig struct {
 	Username string `mapstructure:"database_username"`
