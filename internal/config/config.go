@@ -1,8 +1,9 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -12,12 +13,11 @@ func LoadConfig(path string) (*model.Configuration, error) {
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
-		return nil, errors.Wrap(err, "Failed to read env file")
+		return nil, fmt.Errorf("Failed to read env file: %w", err)
 	}
 	var configuration model.Configuration
-	err := v.Unmarshal(&configuration)
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to decode into map")
+	if err := v.Unmarshal(&configuration); err != nil {
+		return nil, fmt.Errorf("Unable to decode into map, %w", err)
 	}
 
 	return &configuration, nil
