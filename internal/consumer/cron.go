@@ -13,12 +13,16 @@ import (
 func ConfigureCron(ctx context.Context, logger *zap.Logger, config *model.Configuration) error {
 	c := cron.New()
 
+	var err error
 	storyProcessing := func() {
-		processStories(ctx, logger)
+		err = processStories(ctx, logger, config.Consumer.BaseUrl)
 	}
 	storyProcessing()
+	if err != nil {
+		return fmt.Errorf("Error occurred processing stories: %w", err)
+	}
 
-	_, err := c.AddFunc(config.Consumer.CronSchedule, storyProcessing)
+	_, err = c.AddFunc(config.Consumer.CronSchedule, storyProcessing)
 	if err != nil {
 		return fmt.Errorf("Cron job error, %w", err)
 	}
