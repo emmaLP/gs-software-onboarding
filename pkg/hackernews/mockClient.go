@@ -5,11 +5,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockClient struct {
+type Mock struct {
 	mock.Mock
 }
 
-func (m *MockClient) GetTopStories() ([]int, error) {
+func (m *Mock) GetTopStories() ([]int, error) {
 	args := m.Called()
 
 	idsArg, ok := args.Get(0).([]int)
@@ -20,7 +20,7 @@ func (m *MockClient) GetTopStories() ([]int, error) {
 	return idsArg, args.Error(1)
 }
 
-func (m *MockClient) GetItem(id int) (*model.Item, error) {
+func (m *Mock) GetItem(id int) (*model.Item, error) {
 	args := m.Called(id)
 
 	itemArg, ok := args.Get(0).(*model.Item)

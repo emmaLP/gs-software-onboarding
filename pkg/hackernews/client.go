@@ -10,14 +10,14 @@ import (
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
 )
 
-type client struct {
-	httpClient *http.Client
-	baseUrl    string
-}
-
 type Client interface {
 	GetTopStories() ([]int, error)
 	GetItem(id int) (*model.Item, error)
+}
+
+type client struct {
+	httpClient *http.Client
+	baseUrl    string
 }
 
 const (

@@ -43,7 +43,7 @@ func TestGetTopStories(t *testing.T) {
 			server := testServer(testValues.statusCode, testValues.responseBody, t)
 			defer server.Close()
 			client, err := hackernews.New(server.URL, server.Client())
-			assert.Equal(t, nil, err, "Failed to create hackernews client")
+			assert.NoError(t, err, "Failed to create hackernews Client")
 
 			result, err := client.GetTopStories()
 			if testValues.expectedErr != "" {
@@ -54,6 +54,7 @@ func TestGetTopStories(t *testing.T) {
 				var expectedResult []int
 				_ = json.Unmarshal(testValues.responseBody, &expectedResult)
 				assert.Equal(t, expectedResult, result)
+				assert.NoError(t, err)
 			}
 		})
 	}
@@ -67,7 +68,7 @@ func TestGetItem(t *testing.T) {
 		URL:       "",
 		Score:     25,
 		Title:     "Ask HN: The Arc Effect",
-		CreatedAt: time.Time{},
+		Time:      time.Time{}.Unix(),
 		CreatedBy: "tel",
 		Dead:      false,
 		Deleted:   false,
@@ -96,7 +97,7 @@ func TestGetItem(t *testing.T) {
 			server := testServer(testValues.statusCode, testValues.responseBody, t)
 			defer server.Close()
 			client, err := hackernews.New(server.URL, server.Client())
-			assert.Equal(t, nil, err, "Failed to create hackernews client")
+			assert.NoError(t, err, "Failed to create hackernews Client")
 
 			result, err := client.GetItem(counter)
 			if testValues.expectedErr != "" {
@@ -106,9 +107,42 @@ func TestGetItem(t *testing.T) {
 				var expectedResult *model.Item
 				_ = json.Unmarshal(testValues.responseBody, &expectedResult)
 				assert.Equal(t, expectedResult, result)
+				assert.NoError(t, err)
 			}
 		})
 		counter++
+	}
+}
+
+func TestNew(t *testing.T) {
+	tests := map[string]struct {
+		baseUrl            string
+		httpClient         *http.Client
+		expectedErrMessage string
+	}{
+		"Successfully Instantiate": {
+			baseUrl:    "https://test.com/api",
+			httpClient: testServer(200, []byte{}, t).Client(),
+		},
+		"Defaulted HTTP Client": {
+			baseUrl: "https://test.com/api",
+		},
+		"Blank Base URL": {
+			expectedErrMessage: "baseURL cannot be nil or empty",
+		},
+	}
+	for testName, testConfig := range tests {
+		t.Run(testName, func(t *testing.T) {
+			client, err := hackernews.New(testConfig.baseUrl, testConfig.httpClient)
+			if testConfig.expectedErrMessage != "" {
+				assert.EqualErrorf(t, err, testConfig.expectedErrMessage, "Request failed should be: %v, got: %v", testConfig.expectedErrMessage, err)
+				assert.Nil(t, client)
+			} else {
+				assert.NotNil(t, client)
+				assert.NoError(t, err)
+			}
+
+		})
 	}
 }
 
