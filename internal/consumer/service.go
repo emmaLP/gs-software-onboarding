@@ -57,7 +57,10 @@ func (s *Service) processStories(ctx context.Context) error {
 		return fmt.Errorf("Unable to retrieve the top stories. %w", err)
 	}
 	for _, id := range storyIds {
-		topStoriesChan <- id
+		select {
+		case <-ctx.Done():
+		case topStoriesChan <- id:
+		}
 	}
 	close(topStoriesChan)
 
