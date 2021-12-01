@@ -27,12 +27,14 @@ func TestLoadConfig(t *testing.T) {
 		expectedErr string
 	}{
 		{
-			name:     "Successfully load .env file",
+			name:     "Successfully load app.env file",
 			filePath: "../..",
 			envVars:  envVars,
 			expected: &model.Configuration{
 				Consumer: model.ConsumerConfig{
-					BaseUrl: "localhost:8000",
+					BaseUrl:         "localhost:8000",
+					NumberOfWorkers: 5,
+					CronSchedule:    "*/15 * * * *",
 				},
 				Database: model.DatabaseConfig{
 					Username: "test_username",
@@ -42,11 +44,6 @@ func TestLoadConfig(t *testing.T) {
 					Name:     "hackernews",
 				},
 			}},
-		{
-			name:        "No file or env vars set",
-			filePath:    ".",
-			expectedErr: "Failed to read env file: open ./.env: no such file or directory",
-		},
 	}
 
 	for _, test := range tests {
