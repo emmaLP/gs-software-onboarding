@@ -14,7 +14,7 @@ func (m *Mock) GetTopStories() ([]int, error) {
 
 	idsArg, ok := args.Get(0).([]int)
 	if !ok {
-		return nil, nil
+		return nil, args.Error(1)
 	}
 
 	return idsArg, args.Error(1)
@@ -25,7 +25,7 @@ func (m *Mock) GetItem(id int) (*model.Item, error) {
 
 	itemArg, ok := args.Get(0).(*model.Item)
 	if !ok {
-		return nil, nil
+		return nil, args.Error(1)
 	}
 
 	return itemArg, args.Error(1)

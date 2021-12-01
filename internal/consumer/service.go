@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	"go.uber.org/zap"
-	"golang.org/x/sync/errgroup"
 )
 
 type Service struct {
@@ -40,13 +39,15 @@ func NewService(logger *zap.Logger, config *model.ConsumerConfig, hnClient hacke
 func (s *Service) processStories(ctx context.Context) error {
 	s.logger.Info("Processing stories")
 
-	errGroup := new(errgroup.Group)
+	var wg sync.WaitGroup
 	topStoriesChan := make(chan int)
 
 	for i := 0; i < s.numberOfWorkers; i++ {
-		errGroup.Go(func() error {
-			return s.saveItem(topStoriesChan)
-		})
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			s.saveItem(topStoriesChan)
+		}()
 	}
 
 	s.logger.Info("Finished getting the items")
@@ -56,26 +57,26 @@ func (s *Service) processStories(ctx context.Context) error {
 		return fmt.Errorf("Unable to retrieve the top stories. %w", err)
 	}
 	for _, id := range storyIds {
-		topStoriesChan <- id
+		select {
+		case <-ctx.Done():
+		case topStoriesChan <- id:
+		}
 	}
 	close(topStoriesChan)
 
-	if err := errGroup.Wait(); err != nil {
-		return fmt.Errorf("An error occurred while saving the item. %w", err)
-	}
+	wg.Wait()
 	s.logger.Info("Finished processing stories")
 	return nil
 }
 
-func (s *Service) saveItem(topStoriesChan <-chan int) error {
+func (s *Service) saveItem(topStoriesChan <-chan int) {
 	for storyId := range topStoriesChan {
 		item, err := s.hnClient.GetItem(storyId)
 		if err != nil {
-			return fmt.Errorf("An error occurred when trying to fetch the item. %w", err)
+			s.logger.Error("An error occurred when trying to fetch the item.", zap.Error(err))
 		} else if !item.Deleted && !item.Dead {
 			log.Println(item)
 		}
 	}
 	s.logger.Info("Finished looping through the channel for story ids")
-	return nil
 }

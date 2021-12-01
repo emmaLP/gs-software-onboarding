@@ -19,6 +19,13 @@ func main() {
 		log.Fatal("Failed to configure the logger", err)
 	}
 
+	defer func(logger *zap.Logger) {
+		err := logger.Sync()
+		if err != nil {
+			log.Fatal("Failed to perform log sync")
+		}
+	}(logger)
+
 	configuration, err := config.LoadConfig(".")
 	if err != nil {
 		logger.Fatal("Failed to load config", zap.Error(err))
@@ -33,12 +40,6 @@ func configureLogger() (*zap.Logger, error) {
 	logger, err := zap.NewProduction()
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create logger: %w", err)
-	}
-	defer func() {
-		err = logger.Sync()
-	}()
-	if err != nil {
-		return nil, fmt.Errorf("Failed to perform sync: %w", err)
 	}
 
 	return logger, nil

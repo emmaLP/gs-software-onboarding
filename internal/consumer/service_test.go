@@ -2,13 +2,13 @@ package consumer
 
 import (
 	"context"
+	"errors"
 	"testing"
-
-	"go.uber.org/zap"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	"go.uber.org/zap"
 )
 
 func TestProcessStories(t *testing.T) {
@@ -29,6 +29,34 @@ func TestProcessStories(t *testing.T) {
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
+			},
+		},
+		"Two Items": {
+			hnMock: &hackernews.Mock{},
+			ids:    []int{1},
+			consumerConfig: &model.ConsumerConfig{
+				BaseUrl:         "test.com",
+				CronSchedule:    "",
+				NumberOfWorkers: 2,
+			},
+			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock) {
+				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
+				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
+				hnMock.On("GetItem", 2).Return(&hnModel.Item{ID: 2}, nil)
+			},
+		},
+		"Error on item1": {
+			hnMock: &hackernews.Mock{},
+			ids:    []int{1},
+			consumerConfig: &model.ConsumerConfig{
+				BaseUrl:         "test.com",
+				CronSchedule:    "",
+				NumberOfWorkers: 2,
+			},
+			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock) {
+				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
+				hnMock.On("GetItem", 1).Return(nil, errors.New("Failed to retrieve item"))
+				hnMock.On("GetItem", 2).Return(&hnModel.Item{ID: 2}, nil)
 			},
 		},
 	}

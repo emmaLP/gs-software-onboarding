@@ -3,9 +3,8 @@ package config
 import (
 	"fmt"
 
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
 
