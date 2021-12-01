@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
@@ -67,13 +66,7 @@ func (c *client) performRequest(path, method string, result interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Unable to make http call: %w", err)
 	}
-	defer func(Body io.ReadCloser) {
-		err = Body.Close()
-	}(response.Body)
 
-	if err != nil {
-		return fmt.Errorf("Unable to close connection: %w", err)
-	}
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
 		return fmt.Errorf("Unexpected status code returned. Got %d status code", response.StatusCode)
 	}
@@ -81,5 +74,5 @@ func (c *client) performRequest(path, method string, result interface{}) error {
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
 		return fmt.Errorf("Unabled to decode response: %w", err)
 	}
-	return nil
+	return response.Body.Close()
 }
