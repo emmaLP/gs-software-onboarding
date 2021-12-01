@@ -15,7 +15,8 @@ func ConfigureCron(ctx context.Context, logger *zap.Logger, config *model.Config
 
 	var err error
 	storyProcessing := func() {
-		err = processStories(ctx, logger, config.Consumer.BaseUrl)
+		service, _ := NewService(logger, &config.Consumer, nil)
+		err = service.processStories(ctx)
 	}
 	storyProcessing()
 	if err != nil {
