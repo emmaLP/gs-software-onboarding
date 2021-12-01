@@ -6,8 +6,9 @@ type Configuration struct {
 }
 
 type ConsumerConfig struct {
-	BaseUrl      string `mapstructure:"base_url"`
-	CronSchedule string `mapstructure:"cron"`
+	BaseUrl         string `mapstructure:"base_url"`
+	CronSchedule    string `mapstructure:"cron"`
+	NumberOfWorkers int    `mapstructure:"workers"`
 }
 
 type DatabaseConfig struct {
