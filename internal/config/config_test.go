@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-
 	"github.com/stretchr/testify/assert"
 )
 

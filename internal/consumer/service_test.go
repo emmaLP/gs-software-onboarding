@@ -4,11 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"go.uber.org/zap"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	"go.uber.org/zap"
 )
 
 func TestProcessStories(t *testing.T) {

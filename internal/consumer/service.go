@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
