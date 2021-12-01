@@ -14,8 +14,11 @@ func ConfigureCron(ctx context.Context, logger *zap.Logger, config *model.Config
 	c := cron.New()
 
 	var err error
+	service, err := NewService(logger, &config.Consumer, nil)
+	if err != nil {
+		return fmt.Errorf("An error occurred when trying to instantiate the consumer service: %w", err)
+	}
 	storyProcessing := func() {
-		service, _ := NewService(logger, &config.Consumer, nil)
 		err = service.processStories(ctx)
 	}
 	storyProcessing()
