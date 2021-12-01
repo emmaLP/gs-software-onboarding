@@ -60,7 +60,7 @@ func (c *client) GetItem(id int) (*model.Item, error) {
 func (c *client) performRequest(path, method string, result interface{}) error {
 	request, err := http.NewRequest(method, path, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to creae http request object: %w", err)
+		return fmt.Errorf("Failed to create http request object: %w", err)
 	}
 
 	response, err := c.httpClient.Do(request)
@@ -70,6 +70,7 @@ func (c *client) performRequest(path, method string, result interface{}) error {
 	defer func(Body io.ReadCloser) {
 		err = Body.Close()
 	}(response.Body)
+
 	if err != nil {
 		return fmt.Errorf("Unable to close connection: %w", err)
 	}
