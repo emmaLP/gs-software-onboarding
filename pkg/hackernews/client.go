@@ -66,6 +66,7 @@ func (c *client) performRequest(path, method string, result interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Unable to make http call: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
 		return fmt.Errorf("Unexpected status code returned. Got %d status code", response.StatusCode)
@@ -74,5 +75,5 @@ func (c *client) performRequest(path, method string, result interface{}) error {
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
 		return fmt.Errorf("Unabled to decode response: %w", err)
 	}
-	return response.Body.Close()
+	return nil
 }
