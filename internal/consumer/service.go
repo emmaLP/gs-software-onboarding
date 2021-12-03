@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	"go.uber.org/zap"
@@ -15,28 +16,33 @@ type Service struct {
 	logger          *zap.Logger
 	numberOfWorkers int
 	hnClient        hackernews.Client
+	dbClient        database.Database
+	context         context.Context
 }
 
 type Client interface {
 	processStories(ctx context.Context)
 }
 
-func NewService(logger *zap.Logger, config *model.ConsumerConfig, hnClient hackernews.Client) (*Service, error) {
+func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Context, hnClient hackernews.Client, dbClient database.Database) (*Service, error) {
 	if hnClient == nil {
 		var err error
-		hnClient, err = hackernews.New(config.BaseUrl, nil)
+		hnClient, err = hackernews.New(config.Consumer.BaseUrl, nil)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)
 		}
 	}
+
 	return &Service{
 		logger:          logger,
-		numberOfWorkers: config.NumberOfWorkers,
+		numberOfWorkers: config.Consumer.NumberOfWorkers,
 		hnClient:        hnClient,
+		context:         ctx,
+		dbClient:        dbClient,
 	}, nil
 }
 
-func (s *Service) processStories(ctx context.Context) error {
+func (s *Service) processStories() error {
 	s.logger.Info("Processing stories")
 
 	var wg sync.WaitGroup
@@ -58,7 +64,7 @@ func (s *Service) processStories(ctx context.Context) error {
 	}
 	for _, id := range storyIds {
 		select {
-		case <-ctx.Done():
+		case <-s.context.Done():
 		case topStoriesChan <- id:
 		}
 	}
@@ -76,6 +82,10 @@ func (s *Service) saveItem(topStoriesChan <-chan int) {
 			s.logger.Error("An error occurred when trying to fetch the item.", zap.Error(err))
 		} else if !item.Deleted && !item.Dead {
 			log.Println(item)
+			err := s.dbClient.SaveItem(*item)
+			if err != nil {
+				s.logger.Error("Failed to save item", zap.Error(err))
+			}
 		}
 	}
 	s.logger.Info("Finished looping through the channel for story ids")

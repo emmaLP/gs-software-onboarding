@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
+
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
@@ -13,19 +15,23 @@ import (
 
 func TestProcessStories(t *testing.T) {
 	tests := map[string]struct {
-		hnMock         *hackernews.Mock
-		ids            []int
-		consumerConfig *model.ConsumerConfig
-		expectedMocks  func(t *testing.T, hnMock *hackernews.Mock)
+		hnMock        *hackernews.Mock
+		dbMock        *database.Mock
+		ids           []int
+		config        *model.Configuration
+		expectedMocks func(t *testing.T, hnMock *hackernews.Mock)
 	}{
 		"One Item": {
 			hnMock: &hackernews.Mock{},
+			dbMock: &database.Mock{},
 			ids:    []int{1},
-			consumerConfig: &model.ConsumerConfig{
-				BaseUrl:         "test.com",
-				CronSchedule:    "",
-				NumberOfWorkers: 2,
-			},
+			config: &model.Configuration{
+				Consumer: model.ConsumerConfig{
+					BaseUrl:         "test.com",
+					CronSchedule:    "",
+					NumberOfWorkers: 2,
+				}},
+
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
@@ -33,12 +39,14 @@ func TestProcessStories(t *testing.T) {
 		},
 		"Two Items": {
 			hnMock: &hackernews.Mock{},
+			dbMock: &database.Mock{},
 			ids:    []int{1},
-			consumerConfig: &model.ConsumerConfig{
-				BaseUrl:         "test.com",
-				CronSchedule:    "",
-				NumberOfWorkers: 2,
-			},
+			config: &model.Configuration{
+				Consumer: model.ConsumerConfig{
+					BaseUrl:         "test.com",
+					CronSchedule:    "",
+					NumberOfWorkers: 2,
+				}},
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
@@ -47,12 +55,14 @@ func TestProcessStories(t *testing.T) {
 		},
 		"Error on item1": {
 			hnMock: &hackernews.Mock{},
+			dbMock: &database.Mock{},
 			ids:    []int{1},
-			consumerConfig: &model.ConsumerConfig{
-				BaseUrl:         "test.com",
-				CronSchedule:    "",
-				NumberOfWorkers: 2,
-			},
+			config: &model.Configuration{
+				Consumer: model.ConsumerConfig{
+					BaseUrl:         "test.com",
+					CronSchedule:    "",
+					NumberOfWorkers: 2,
+				}},
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
 				hnMock.On("GetItem", 1).Return(nil, errors.New("Failed to retrieve item"))
@@ -69,12 +79,12 @@ func TestProcessStories(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			service, err := NewService(logger, testConfig.consumerConfig, testConfig.hnMock)
+			service, err := NewService(logger, testConfig.config, context.TODO(), testConfig.hnMock, testConfig.dbMock)
 			if err != nil {
 				logger.Fatal("An unexpected err happened")
 				t.FailNow()
 			}
-			err = service.processStories(context.TODO())
+			err = service.processStories()
 			if err != nil {
 				logger.Fatal("An unexpected err happened")
 				t.FailNow()
