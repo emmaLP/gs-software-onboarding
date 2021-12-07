@@ -33,14 +33,6 @@ func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Con
 		}
 	}
 
-	if dbClient == nil {
-		var err error
-		dbClient, err = database.New(ctx, logger, &config.Database)
-		if err != nil {
-			return nil, fmt.Errorf("Unable to create database client: %w", err)
-		}
-	}
-
 	return &service{
 		logger:          logger,
 		numberOfWorkers: config.Consumer.NumberOfWorkers,

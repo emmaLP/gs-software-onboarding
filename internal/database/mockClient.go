@@ -12,7 +12,7 @@ type Mock struct {
 func (m *Mock) SaveItem(item *model.Item) error {
 	args := m.Called(item)
 
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (m *Mock) CloseConnection() {
