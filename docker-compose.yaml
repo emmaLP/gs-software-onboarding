@@ -20,6 +20,6 @@ services:
       - DATABASE_PASSWORD=admin
       - DATABASE_HOST=mongo
       - DATABASE_PORT=27017
-      - DATABASE_NAME=postgres
+      - DATABASE_NAME=hackernews
     depends_on:
       - mongo
