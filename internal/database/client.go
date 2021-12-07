@@ -17,8 +17,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Database interface {
-	SaveItem(item hnModel.Item) error
+type Client interface {
+	SaveItem(item *hnModel.Item) error
 	CloseConnection()
 }
 

@@ -9,7 +9,7 @@ type Mock struct {
 	mock.Mock
 }
 
-func (m *Mock) SaveItem(item model.Item) error {
+func (m *Mock) SaveItem(item *model.Item) error {
 	args := m.Called(item)
 
 	return args.Error(1)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/database"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"

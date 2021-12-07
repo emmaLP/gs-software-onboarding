@@ -12,11 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type Service struct {
+type service struct {
 	logger          *zap.Logger
 	numberOfWorkers int
 	hnClient        hackernews.Client
-	dbClient        database.Database
+	dbClient        database.Client
 	context         context.Context
 }
 
@@ -24,7 +24,7 @@ type Client interface {
 	processStories(ctx context.Context)
 }
 
-func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Context, hnClient hackernews.Client, dbClient database.Database) (*Service, error) {
+func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Context, hnClient hackernews.Client, dbClient database.Client) (*service, error) {
 	if hnClient == nil {
 		var err error
 		hnClient, err = hackernews.New(config.Consumer.BaseUrl, nil)
@@ -33,7 +33,15 @@ func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Con
 		}
 	}
 
-	return &Service{
+	if dbClient == nil {
+		var err error
+		dbClient, err = database.New(ctx, logger, &config.Database)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to create database client: %w", err)
+		}
+	}
+
+	return &service{
 		logger:          logger,
 		numberOfWorkers: config.Consumer.NumberOfWorkers,
 		hnClient:        hnClient,
@@ -42,7 +50,7 @@ func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Con
 	}, nil
 }
 
-func (s *Service) processStories() error {
+func (s *service) processStories() error {
 	s.logger.Info("Processing stories")
 
 	var wg sync.WaitGroup
@@ -75,14 +83,14 @@ func (s *Service) processStories() error {
 	return nil
 }
 
-func (s *Service) saveItem(topStoriesChan <-chan int) {
+func (s *service) saveItem(topStoriesChan <-chan int) {
 	for storyId := range topStoriesChan {
 		item, err := s.hnClient.GetItem(storyId)
 		if err != nil {
 			s.logger.Error("An error occurred when trying to fetch the item.", zap.Error(err))
 		} else if !item.Deleted && !item.Dead {
 			log.Println(item)
-			err := s.dbClient.SaveItem(*item)
+			err := s.dbClient.SaveItem(item)
 			if err != nil {
 				s.logger.Error("Failed to save item", zap.Error(err))
 			}
