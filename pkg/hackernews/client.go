@@ -45,6 +45,7 @@ func (c *client) GetTopStories() ([]int, error) {
 
 	return ids, nil
 }
+
 func (c *client) GetItem(id int) (*model.Item, error) {
 	path := fmt.Sprintf(itemPath, c.baseUrl, id)
 	var item *model.Item
