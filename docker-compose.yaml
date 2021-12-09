@@ -10,6 +10,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: gymshark
+      MONGODB_ADVERTISED_HOSTNAME: mongo-host
   consumer:
     build:
       context: .
@@ -21,5 +22,6 @@ services:
       - DATABASE_HOST=mongo
       - DATABASE_PORT=27017
       - DATABASE_NAME=hackernews
+      - BASE_URL=https://hacker-news.firebaseio.com/v0
     depends_on:
       - mongo

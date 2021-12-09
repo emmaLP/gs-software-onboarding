@@ -1,3 +1,5 @@
+ARG go_version=1.17
+
 # User
 FROM alpine:3.13.1 as user
 ARG uid=10001
@@ -8,9 +10,8 @@ RUN echo "scratchuser:x:${uid}:${gid}::/home/scratchuser:/bin/sh" > /scratchpass
 FROM alpine:3.13.1 as certs
 RUN apk add -U --no-cache ca-certificates
 
-ARG go_version=1.17
 # Build
-FROM golang:${go_version}-alpine as build
+FROM golang:${go_version} as build
 WORKDIR /code/
 ENV GO111MODULE=on
 COPY go.mod go.sum ./
