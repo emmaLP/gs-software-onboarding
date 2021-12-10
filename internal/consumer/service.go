@@ -23,19 +23,23 @@ type Client interface {
 	processStories(ctx context.Context)
 }
 
-func NewService(logger *zap.Logger, config *model.Configuration, hnClient hackernews.Client, dbClient database.Client) (*service, error) {
-	if hnClient == nil {
+func NewService(logger *zap.Logger, config *model.Configuration, dbClient database.Client, hnClient ...hackernews.Client) (*service, error) {
+	var hackernewsClient hackernews.Client
+	if len(hnClient) == 0 {
 		var err error
-		hnClient, err = hackernews.New(config.Consumer.BaseUrl, nil)
+		hackernewsClient, err = hackernews.New(config.Consumer.BaseUrl, nil)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)
 		}
+	} else {
+		//Only ever get the first one, ignore the rest
+		hackernewsClient = hnClient[0]
 	}
 
 	return &service{
 		logger:          logger,
 		numberOfWorkers: config.Consumer.NumberOfWorkers,
-		hnClient:        hnClient,
+		hnClient:        hackernewsClient,
 		dbClient:        dbClient,
 	}, nil
 }
