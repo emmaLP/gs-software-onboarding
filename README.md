@@ -31,10 +31,6 @@ To run a fully functional consumer use the following command:
 docker-compose up -d
 ```
 
-**_Note: Ctrl-C command on just `docker-compose up` seemed to hang, but running in the background and
-using `docker-compose down` command worked fine_**
-To stop running the consumer:
-
 ```bash
 docker-compose down --remove-orphans
 ```
