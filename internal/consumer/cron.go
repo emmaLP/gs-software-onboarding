@@ -19,12 +19,12 @@ func ConfigureCron(ctx context.Context, logger *zap.Logger, config *model.Config
 		return fmt.Errorf("Unexpected error when connecting to the database. %w", err)
 	}
 	defer databaseClient.CloseConnection()
-	service, err := NewService(logger, config, ctx, nil, databaseClient)
+	service, err := NewService(logger, config, nil, databaseClient)
 	if err != nil {
 		return fmt.Errorf("An error occurred when trying to instantiate the consumer service: %w", err)
 	}
 	storyProcessing := func() {
-		err = service.processStories()
+		err = service.processStories(ctx)
 	}
 	storyProcessing()
 	if err != nil {

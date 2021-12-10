@@ -16,11 +16,11 @@ WORKDIR /code/
 ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 COPY go.mod go.sum ./
+RUN go mod download
+
 COPY ./cmd/ ./cmd/
 COPY ./internal/ ./internal/
 COPY ./pkg/ ./pkg/
-
-RUN go mod download
 RUN GOOS=linux GOARCH=amd64 go build -o ./bin/consumer ./cmd/consumer
 
 FROM scratch as consumer

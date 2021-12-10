@@ -17,14 +17,13 @@ type service struct {
 	numberOfWorkers int
 	hnClient        hackernews.Client
 	dbClient        database.Client
-	context         context.Context
 }
 
 type Client interface {
 	processStories(ctx context.Context)
 }
 
-func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Context, hnClient hackernews.Client, dbClient database.Client) (*service, error) {
+func NewService(logger *zap.Logger, config *model.Configuration, hnClient hackernews.Client, dbClient database.Client) (*service, error) {
 	if hnClient == nil {
 		var err error
 		hnClient, err = hackernews.New(config.Consumer.BaseUrl, nil)
@@ -37,12 +36,11 @@ func NewService(logger *zap.Logger, config *model.Configuration, ctx context.Con
 		logger:          logger,
 		numberOfWorkers: config.Consumer.NumberOfWorkers,
 		hnClient:        hnClient,
-		context:         ctx,
 		dbClient:        dbClient,
 	}, nil
 }
 
-func (s *service) processStories() error {
+func (s *service) processStories(ctx context.Context) error {
 	s.logger.Info("Processing stories")
 
 	var wg sync.WaitGroup
@@ -64,7 +62,7 @@ func (s *service) processStories() error {
 	}
 	for _, id := range storyIds {
 		select {
-		case <-s.context.Done():
+		case <-ctx.Done():
 		case topStoriesChan <- id:
 		}
 	}
