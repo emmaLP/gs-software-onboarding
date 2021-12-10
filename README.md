@@ -13,12 +13,28 @@ The consumer will periodically run to seed a mongo database from the HackerNews 
 
 To run the consumer:
 
+The command below relies on a running mongo database running
+
 ```bash
 cp .env.example app.env && go run cmd/consumer/main.go
 ```
 
-Remember to remove the `app.env` file:
+Remember to remove the `app.env` file once you are done:
 
 ```bash
 rm app.env
+```
+
+To run a fully functional consumer use the following command:
+
+```bash
+docker-compose up -d
+```
+
+**_Note: Ctrl-C command on just `docker-compose up` seemed to hang, but running in the background and
+using `docker-compose down` command worked fine_**
+To stop running the consumer:
+
+```bash
+docker-compose down --remove-orphans
 ```
