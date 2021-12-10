@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/consumer"
@@ -13,6 +15,14 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	go func() {
+		// handle interrupts and propagate the changes across the consumer pipeline
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		<-c
+		cancel()
+	}()
 
 	logger, err := configureLogger()
 	if err != nil {

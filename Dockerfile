@@ -14,10 +14,14 @@ RUN apk add -U --no-cache ca-certificates
 FROM golang:${go_version} as build
 WORKDIR /code/
 ENV GO111MODULE=on
+ENV CGO_ENABLED=0
 COPY go.mod go.sum ./
+COPY ./cmd/ ./cmd/
+COPY ./internal/ ./internal/
+COPY ./pkg/ ./pkg/
+
 RUN go mod download
-COPY . .
-RUN GOOS=linux CGO_ENABLED=0 GOGC=off GOARCH=amd64 go build -o ./bin/consumer ./cmd/consumer
+RUN GOOS=linux GOARCH=amd64 go build -o ./bin/consumer ./cmd/consumer
 
 FROM scratch as consumer
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
