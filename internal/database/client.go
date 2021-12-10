@@ -5,16 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"go.mongodb.org/mongo-driver/bson"
-
-	"go.uber.org/zap"
-
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-
 	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 )
 
 type Client interface {

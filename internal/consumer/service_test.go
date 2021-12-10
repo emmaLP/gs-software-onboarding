@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/database"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
