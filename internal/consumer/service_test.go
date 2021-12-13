@@ -99,7 +99,7 @@ func TestProcessStories(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			service, err := NewService(logger, testConfig.config, testConfig.dbMock, testConfig.hnMock)
+			service, err := NewService(logger, testConfig.config, testConfig.dbMock, WithHackerNewsClient(testConfig.hnMock))
 			if err != nil {
 				logger.Fatal("An unexpected err happened")
 				t.FailNow()

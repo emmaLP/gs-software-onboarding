@@ -23,25 +23,33 @@ type Client interface {
 	processStories(ctx context.Context)
 }
 
-func NewService(logger *zap.Logger, config *model.Configuration, dbClient database.Client, hnClient ...hackernews.Client) (*service, error) {
-	var hackernewsClient hackernews.Client
-	if len(hnClient) == 0 {
-		var err error
-		hackernewsClient, err = hackernews.New(config.Consumer.BaseUrl, nil)
-		if err != nil {
-			return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)
-		}
-	} else {
-		//Only ever get the first one, ignore the rest
-		hackernewsClient = hnClient[0]
+type ServiceOptions func(*service)
+
+func NewService(logger *zap.Logger, config *model.Configuration, dbClient database.Client, opts ...ServiceOptions) (*service, error) {
+
+	hnClient, err := hackernews.New(config.Consumer.BaseUrl, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)
 	}
 
-	return &service{
+	service := &service{
 		logger:          logger,
 		numberOfWorkers: config.Consumer.NumberOfWorkers,
-		hnClient:        hackernewsClient,
+		hnClient:        hnClient,
 		dbClient:        dbClient,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(service)
+	}
+
+	return service, nil
+}
+
+func WithHackerNewsClient(client hackernews.Client) ServiceOptions {
+	return func(s *service) {
+		s.hnClient = client
+	}
 }
 
 func (s *service) processStories(ctx context.Context) error {
