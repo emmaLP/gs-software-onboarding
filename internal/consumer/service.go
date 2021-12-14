@@ -6,37 +6,52 @@ import (
 	"log"
 	"sync"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	"go.uber.org/zap"
 )
 
-type Service struct {
+type service struct {
 	logger          *zap.Logger
 	numberOfWorkers int
 	hnClient        hackernews.Client
+	dbClient        database.Client
 }
 
 type Client interface {
 	processStories(ctx context.Context)
 }
 
-func NewService(logger *zap.Logger, config *model.ConsumerConfig, hnClient hackernews.Client) (*Service, error) {
-	if hnClient == nil {
-		var err error
-		hnClient, err = hackernews.New(config.BaseUrl, nil)
-		if err != nil {
-			return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)
-		}
+type ServiceOptions func(*service)
+
+func NewService(logger *zap.Logger, config *model.Configuration, dbClient database.Client, opts ...ServiceOptions) (*service, error) {
+	hnClient, err := hackernews.New(config.Consumer.BaseUrl, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)
 	}
-	return &Service{
+
+	service := &service{
 		logger:          logger,
-		numberOfWorkers: config.NumberOfWorkers,
+		numberOfWorkers: config.Consumer.NumberOfWorkers,
 		hnClient:        hnClient,
-	}, nil
+		dbClient:        dbClient,
+	}
+
+	for _, opt := range opts {
+		opt(service)
+	}
+
+	return service, nil
 }
 
-func (s *Service) processStories(ctx context.Context) error {
+func WithHackerNewsClient(client hackernews.Client) ServiceOptions {
+	return func(s *service) {
+		s.hnClient = client
+	}
+}
+
+func (s *service) processStories(ctx context.Context) error {
 	s.logger.Info("Processing stories")
 
 	var wg sync.WaitGroup
@@ -69,13 +84,17 @@ func (s *Service) processStories(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) saveItem(topStoriesChan <-chan int) {
+func (s *service) saveItem(topStoriesChan <-chan int) {
 	for storyId := range topStoriesChan {
 		item, err := s.hnClient.GetItem(storyId)
 		if err != nil {
 			s.logger.Error("An error occurred when trying to fetch the item.", zap.Error(err))
 		} else if !item.Deleted && !item.Dead {
 			log.Println(item)
+			err := s.dbClient.SaveItem(item)
+			if err != nil {
+				s.logger.Error("Failed to save item", zap.Error(err))
+			}
 		}
 	}
 	s.logger.Info("Finished looping through the channel for story ids")

@@ -141,7 +141,6 @@ func TestNew(t *testing.T) {
 				assert.NotNil(t, client)
 				assert.NoError(t, err)
 			}
-
 		})
 	}
 }

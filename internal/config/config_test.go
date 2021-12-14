@@ -41,7 +41,8 @@ func TestLoadConfig(t *testing.T) {
 					Port:     "30000",
 					Name:     "hackernews",
 				},
-			}},
+			},
+		},
 		"Successfully load config from file": {
 			filePath:  ".",
 			writeFile: true,
@@ -51,7 +52,8 @@ func TestLoadConfig(t *testing.T) {
 					NumberOfWorkers: 5,
 					CronSchedule:    "*/15 * * * *",
 				},
-			}},
+			},
+		},
 	}
 
 	for testName, test := range tests {
