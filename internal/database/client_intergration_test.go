@@ -84,6 +84,5 @@ func TestSaveItem(t *testing.T) {
 				client.CloseConnection()
 			})
 		})
-
 	}
 }

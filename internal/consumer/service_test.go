@@ -29,12 +29,12 @@ func TestProcessStories(t *testing.T) {
 					BaseUrl:         "test.com",
 					CronSchedule:    "",
 					NumberOfWorkers: 2,
-				}},
+				},
+			},
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
 				dbMock.On("SaveItem", &hnModel.Item{ID: 1}).Return(nil)
-
 			},
 		},
 		"Two Items": {
@@ -46,7 +46,8 @@ func TestProcessStories(t *testing.T) {
 					BaseUrl:         "test.com",
 					CronSchedule:    "",
 					NumberOfWorkers: 2,
-				}},
+				},
+			},
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
@@ -64,7 +65,8 @@ func TestProcessStories(t *testing.T) {
 					BaseUrl:         "test.com",
 					CronSchedule:    "",
 					NumberOfWorkers: 2,
-				}},
+				},
+			},
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
 				hnMock.On("GetItem", 1).Return(nil, errors.New("Failed to retrieve item"))
@@ -81,7 +83,8 @@ func TestProcessStories(t *testing.T) {
 					BaseUrl:         "test.com",
 					CronSchedule:    "",
 					NumberOfWorkers: 2,
-				}},
+				},
+			},
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{2}, nil)
 				hnMock.On("GetItem", 2).Return(&hnModel.Item{ID: 2}, nil)
