@@ -19,27 +19,9 @@ go test ./...
 
 ## Services
 
-This is a mono repo that contains the following services:
+This is a mono repo that contains multiple services.
 
-### Consumer
-
-The consumer will periodically run to seed a mongo database from the HackerNews API.
-
-To run the consumer:
-
-The command below relies on a running mongo database running
-
-```bash
-cp .env.example app.env && go run cmd/consumer/main.go
-```
-
-Remember to remove the `app.env` file once you are done:
-
-```bash
-rm app.env
-```
-
-To run a fully functional consumer use the following command:
+To run all services:
 
 ```bash
 docker-compose up -d
@@ -48,3 +30,13 @@ docker-compose up -d
 ```bash
 docker-compose down --remove-orphans
 ```
+
+### Consumer
+
+The consumer will periodically run to seed a mongo database from the HackerNews API.
+
+### API
+
+The api reads data from a mongo database and returns the necessary information based on the API path.
+
+
