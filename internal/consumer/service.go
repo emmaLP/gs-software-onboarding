@@ -26,7 +26,6 @@ type Client interface {
 type ServiceOptions func(*service)
 
 func NewService(logger *zap.Logger, config *model.Configuration, dbClient database.Client, opts ...ServiceOptions) (*service, error) {
-
 	hnClient, err := hackernews.New(config.Consumer.BaseUrl, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create HackerNew client: %w", err)

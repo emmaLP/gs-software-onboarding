@@ -30,7 +30,6 @@ func TestProcessStories(t *testing.T) {
 					CronSchedule:    "",
 					NumberOfWorkers: 2,
 				}},
-
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
