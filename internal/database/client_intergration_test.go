@@ -80,6 +80,10 @@ func TestSaveItem(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+			t.Cleanup(func() {
+				client.CloseConnection()
+			})
 		})
+
 	}
 }

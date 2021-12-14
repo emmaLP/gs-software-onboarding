@@ -3,7 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
@@ -42,12 +45,25 @@ func New(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig) 
 	if err != nil {
 		return nil, fmt.Errorf("An error occurred when trying to connect to mongo. %w", err)
 	}
-	return &database{
+
+	database := &database{
 		mongoClient:  client,
 		context:      ctx,
 		logger:       logger,
 		databaseName: config.Name,
-	}, nil
+	}
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("mongo refused to connect: %v %w", ctx.Err(), err)
+		default:
+			err := client.Ping(ctx, readpref.Primary())
+			if err == nil {
+				log.Print("mongo is now connected")
+				return database, nil
+			}
+		}
+	}
 }
 
 func (d *database) SaveItem(item *hnModel.Item) error {
