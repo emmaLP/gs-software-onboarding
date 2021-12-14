@@ -3,6 +3,20 @@
 This project helps new software engineers get familiar with coding standards and help gain a better understanding of how
 GS software team work.
 
+## Building/Testing
+
+This project requires docker to be running on the machine as integration tests
+leverage [testcontainers](https://github.com/testcontainers/testcontainers-go)
+which will start&stop docker containers as part of the tests
+
+### Run all tests
+
+Run the following command:
+
+```bash
+go test ./...
+```
+
 ## Services
 
 This is a mono repo that contains the following services:
