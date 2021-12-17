@@ -24,3 +24,14 @@ services:
       - BASE_URL=https://hacker-news.firebaseio.com/v0
     depends_on:
       - mongo
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    ports:
+      - "8081:8080"
+    environment:
+      API_ADDRESS: ":8080"
+    depends_on:
+      - mongo
