@@ -34,7 +34,7 @@ func TestProcessStories(t *testing.T) {
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{1}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
-				dbMock.On("SaveItem", &hnModel.Item{ID: 1}).Return(nil)
+				dbMock.On("SaveItem", context.TODO(), &hnModel.Item{ID: 1}).Return(nil)
 			},
 		},
 		"Two Items": {
@@ -52,8 +52,8 @@ func TestProcessStories(t *testing.T) {
 				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
 				hnMock.On("GetItem", 1).Return(&hnModel.Item{ID: 1}, nil)
 				hnMock.On("GetItem", 2).Return(&hnModel.Item{ID: 2}, nil)
-				dbMock.On("SaveItem", &hnModel.Item{ID: 1}).Return(nil).Once()
-				dbMock.On("SaveItem", &hnModel.Item{ID: 2}).Return(nil).Once()
+				dbMock.On("SaveItem", context.TODO(), &hnModel.Item{ID: 1}).Return(nil).Once()
+				dbMock.On("SaveItem", context.TODO(), &hnModel.Item{ID: 2}).Return(nil).Once()
 			},
 		},
 		"Unable to get item from hackernews": {
@@ -71,7 +71,7 @@ func TestProcessStories(t *testing.T) {
 				hnMock.On("GetTopStories").Return([]int{1, 2}, nil)
 				hnMock.On("GetItem", 1).Return(nil, errors.New("Failed to retrieve item"))
 				hnMock.On("GetItem", 2).Return(&hnModel.Item{ID: 2}, nil)
-				dbMock.On("SaveItem", &hnModel.Item{ID: 2}).Return(nil).Once()
+				dbMock.On("SaveItem", context.TODO(), &hnModel.Item{ID: 2}).Return(nil).Once()
 			},
 		},
 		"Unable save item": {
@@ -88,7 +88,7 @@ func TestProcessStories(t *testing.T) {
 			expectedMocks: func(t *testing.T, hnMock *hackernews.Mock, dbMock *database.Mock) {
 				hnMock.On("GetTopStories").Return([]int{2}, nil)
 				hnMock.On("GetItem", 2).Return(&hnModel.Item{ID: 2}, nil)
-				dbMock.On("SaveItem", &hnModel.Item{ID: 2}).Return(errors.New("Failed to save item")).Once()
+				dbMock.On("SaveItem", context.TODO(), &hnModel.Item{ID: 2}).Return(errors.New("Failed to save item")).Once()
 			},
 		},
 	}

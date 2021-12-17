@@ -18,7 +18,7 @@ func ConfigureCron(ctx context.Context, logger *zap.Logger, config *model.Config
 	if err != nil {
 		return fmt.Errorf("Unexpected error when connecting to the database. %w", err)
 	}
-	defer databaseClient.CloseConnection()
+	defer databaseClient.CloseConnection(ctx)
 	service, err := NewService(logger, config, databaseClient)
 	if err != nil {
 		return fmt.Errorf("An error occurred when trying to instantiate the consumer service: %w", err)

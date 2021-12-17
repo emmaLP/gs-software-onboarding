@@ -366,7 +366,7 @@ func TestListJobs(t *testing.T) {
 				&job1, &job2,
 			},
 			itemsToSave: []*hnModel.Item{
-				&story1, &job2, &job1,
+				&story1, &job1, &job2,
 			},
 		},
 	}
