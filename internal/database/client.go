@@ -17,13 +17,15 @@ import (
 )
 
 type Client interface {
-	SaveItem(item *hnModel.Item) error
-	CloseConnection()
+	SaveItem(ctx context.Context, item *hnModel.Item) error
+	ListAll(ctx context.Context) ([]*hnModel.Item, error)
+	ListStories(ctx context.Context) ([]*hnModel.Item, error)
+	ListJobs(ctx context.Context) ([]*hnModel.Item, error)
+	CloseConnection(ctx context.Context)
 }
 
 type database struct {
 	mongoClient  *mongo.Client
-	context      context.Context
 	logger       *zap.Logger
 	databaseName string
 }
@@ -48,7 +50,6 @@ func New(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig) 
 
 	database := &database{
 		mongoClient:  client,
-		context:      ctx,
 		logger:       logger,
 		databaseName: config.Name,
 	}
@@ -66,14 +67,14 @@ func New(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig) 
 	}
 }
 
-func (d *database) SaveItem(item *hnModel.Item) error {
+func (d *database) SaveItem(ctx context.Context, item *hnModel.Item) error {
 	collection := d.getCollection("items")
 	opts := options.Update().SetUpsert(true)
 
 	update := bson.M{
 		"$set": item,
 	}
-	_, err := collection.UpdateOne(d.context, bson.M{"id": item.ID}, update, opts)
+	_, err := collection.UpdateOne(ctx, bson.M{"id": item.ID}, update, opts)
 	if err != nil {
 		return fmt.Errorf("Unable to save item. %w", err)
 	}
@@ -81,9 +82,37 @@ func (d *database) SaveItem(item *hnModel.Item) error {
 	return nil
 }
 
-func (d *database) CloseConnection() {
+func (d *database) ListAll(ctx context.Context) ([]*hnModel.Item, error) {
+	return d.find(ctx, bson.M{})
+}
+
+func (d *database) ListStories(ctx context.Context) ([]*hnModel.Item, error) {
+	filter := bson.M{"type": "story"}
+	return d.find(ctx, filter)
+}
+
+func (d *database) ListJobs(ctx context.Context) ([]*hnModel.Item, error) {
+	filter := bson.M{"type": "job"}
+	return d.find(ctx, filter)
+}
+
+func (d *database) find(ctx context.Context, filter interface{}) ([]*hnModel.Item, error) {
+	collection := d.getCollection("items")
+	all, err := collection.Find(ctx, filter)
+	var items []*hnModel.Item
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve items. %w", err)
+	}
+
+	if err = all.All(ctx, &items); err != nil {
+		return nil, fmt.Errorf("Failed to retrieve items within cursor. %w", err)
+	}
+	return items, nil
+}
+
+func (d *database) CloseConnection(ctx context.Context) {
 	d.logger.Debug("Closing database connection")
-	err := d.mongoClient.Disconnect(d.context)
+	err := d.mongoClient.Disconnect(ctx)
 	if err != nil {
 		d.logger.Error("Failed to close connection to database", zap.Error(err))
 	}
