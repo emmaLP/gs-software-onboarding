@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/emmaLP/gs-software-onboarding/internal/logging"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/consumer"
@@ -24,7 +25,7 @@ func main() {
 		cancel()
 	}()
 
-	logger, err := configureLogger()
+	logger, err := logging.New()
 	if err != nil {
 		log.Fatal("Failed to configure the logger", err)
 	}
@@ -44,13 +45,4 @@ func main() {
 	if err := consumer.ConfigureCron(ctx, logger, configuration); err != nil {
 		logger.Fatal("Failed to configure the cron", zap.Error(err))
 	}
-}
-
-func configureLogger() (*zap.Logger, error) {
-	logger, err := zap.NewProduction()
-	if err != nil {
-		return nil, fmt.Errorf("Unable to create logger: %w", err)
-	}
-
-	return logger, nil
 }
