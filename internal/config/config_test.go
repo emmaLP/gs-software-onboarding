@@ -41,6 +41,9 @@ func TestLoadConfig(t *testing.T) {
 					Port:     "30000",
 					Name:     "hackernews",
 				},
+				Api: model.APIConfig{
+					Address: ":8080",
+				},
 			},
 		},
 		"Successfully load config from file": {
@@ -51,6 +54,9 @@ func TestLoadConfig(t *testing.T) {
 					BaseUrl:         "localhost:8000",
 					NumberOfWorkers: 5,
 					CronSchedule:    "*/15 * * * *",
+				},
+				Api: model.APIConfig{
+					Address: ":8080",
 				},
 			},
 		},
