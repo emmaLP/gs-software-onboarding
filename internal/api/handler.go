@@ -19,21 +19,36 @@ type Handler interface {
 
 type apiHandler struct {
 	logger   *zap.Logger
-	config   *model.Configuration
+	config   *model.DatabaseConfig
 	dbClient database.Client
 }
 
-func NewHandler(ctx context.Context, logger *zap.Logger, config *model.Configuration) (*apiHandler, error) {
-	databaseClient, err := database.New(ctx, logger, &config.Database)
-	if err != nil {
-		return nil, fmt.Errorf("Unexpected error when connecting to the database. %w", err)
+type HandlerOptions func(handler *apiHandler)
+
+func NewHandler(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig, opts ...HandlerOptions) (*apiHandler, error) {
+	handler := &apiHandler{
+		logger: logger,
+		config: config,
 	}
-	defer databaseClient.CloseConnection(ctx)
-	return &apiHandler{
-		logger:   logger,
-		dbClient: databaseClient,
-		config:   config,
-	}, nil
+
+	for _, opt := range opts {
+		opt(handler)
+	}
+
+	if handler.dbClient == nil {
+		databaseClient, err := database.New(ctx, logger, config)
+		if err != nil {
+			return nil, fmt.Errorf("Unexpected error when connecting to the database. %w", err)
+		}
+		handler.dbClient = databaseClient
+	}
+	return handler, nil
+}
+
+func WithDatabaseClient(client database.Client) HandlerOptions {
+	return func(h *apiHandler) {
+		h.dbClient = client
+	}
 }
 
 func (h *apiHandler) GetAll(c echo.Context) error {

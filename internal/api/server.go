@@ -32,7 +32,7 @@ func NewServer(ctx context.Context, logger *zap.Logger, config *model.Configurat
 	router.GET("/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
-	handler, err := NewHandler(ctx, logger, config)
+	handler, err := NewHandler(ctx, logger, &config.Database)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create the API handler. %w", err)
 	}

@@ -114,6 +114,7 @@ func TestProcessStories(t *testing.T) {
 
 			if testConfig.expectedMocks != nil {
 				testConfig.hnMock.AssertExpectations(t)
+				testConfig.dbMock.AssertExpectations(t)
 			}
 		})
 	}

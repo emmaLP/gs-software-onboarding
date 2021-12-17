@@ -18,20 +18,21 @@ func (m *Mock) SaveItem(ctx context.Context, item *model.Item) error {
 }
 
 func (m *Mock) ListAll(ctx context.Context) ([]*model.Item, error) {
-	return m.find(ctx)
+	args := m.Called(ctx)
+	return find(args)
 }
 
 func (m *Mock) ListStories(ctx context.Context) ([]*model.Item, error) {
-	return m.find(ctx)
+	args := m.Called(ctx)
+	return find(args)
 }
 
 func (m *Mock) ListJobs(ctx context.Context) ([]*model.Item, error) {
-	return m.find(ctx)
+	args := m.Called(ctx)
+	return find(args)
 }
 
-func (m *Mock) find(ctx context.Context) ([]*model.Item, error) {
-	args := m.Called(ctx)
-
+func find(args mock.Arguments) ([]*model.Item, error) {
 	collection, ok := args.Get(0).([]*model.Item)
 	if !ok {
 		return nil, args.Error(1)
