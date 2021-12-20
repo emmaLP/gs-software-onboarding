@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Handler is an interface enabling multiple implementations of the methods within
 type Handler interface {
 	GetAll(c echo.Context) error
 	ListStories(c echo.Context) error
@@ -23,8 +24,10 @@ type apiHandler struct {
 	dbClient database.Client
 }
 
+// HandlerOptions give the ability to inject optional struct variables or override others
 type HandlerOptions func(handler *apiHandler)
 
+// NewHandler populates the struct of reusable variables needed for implementing the interface functions
 func NewHandler(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig, opts ...HandlerOptions) (*apiHandler, error) {
 	handler := &apiHandler{
 		logger: logger,
@@ -45,6 +48,7 @@ func NewHandler(ctx context.Context, logger *zap.Logger, config *model.DatabaseC
 	return handler, nil
 }
 
+// WithDatabaseClient is a help func to inject a HandlerOption without needing to write the underlying code
 func WithDatabaseClient(client database.Client) HandlerOptions {
 	return func(h *apiHandler) {
 		h.dbClient = client
