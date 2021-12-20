@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/emmaLP/gs-software-onboarding/pkg/common/model"
-
 	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews"
 	"github.com/stretchr/testify/assert"
 )
