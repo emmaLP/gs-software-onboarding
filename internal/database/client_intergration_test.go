@@ -129,6 +129,17 @@ func TestListAll(t *testing.T) {
 			},
 			expectedErr: "Failed to retrieve items. the Database field must be set on Operation",
 		},
+		"Returns zero items": {
+			config: &model.DatabaseConfig{
+				Username: dbConfig.User,
+				Password: dbConfig.Password,
+				Host:     dbConfig.Host,
+				Port:     fmt.Sprint(dbConfig.Port),
+				Name:     "test",
+			},
+			expectedResponse: nil,
+			itemsToSave:      nil,
+		},
 		"Returns one item": {
 			config: &model.DatabaseConfig{
 				Username: dbConfig.User,

@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Handler is an interface enabling multiple implementations of the methods within
 type Handler interface {
 	GetAll(c echo.Context) error
 	ListStories(c echo.Context) error
@@ -23,8 +24,10 @@ type apiHandler struct {
 	dbClient database.Client
 }
 
+// HandlerOptions give the ability to inject optional struct variables or override others
 type HandlerOptions func(handler *apiHandler)
 
+// NewHandler populates the struct of reusable variables needed for implementing the interface functions
 func NewHandler(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig, opts ...HandlerOptions) (*apiHandler, error) {
 	handler := &apiHandler{
 		logger: logger,
@@ -45,6 +48,7 @@ func NewHandler(ctx context.Context, logger *zap.Logger, config *model.DatabaseC
 	return handler, nil
 }
 
+// WithDatabaseClient is a help func to inject a HandlerOption without needing to write the underlying code
 func WithDatabaseClient(client database.Client) HandlerOptions {
 	return func(h *apiHandler) {
 		h.dbClient = client
@@ -54,7 +58,7 @@ func WithDatabaseClient(client database.Client) HandlerOptions {
 func (h *apiHandler) GetAll(c echo.Context) error {
 	all, err := h.dbClient.ListAll(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, fmt.Errorf("Error retrieving items from db. %w", err))
+		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving items"))
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"items": all,
@@ -64,7 +68,7 @@ func (h *apiHandler) GetAll(c echo.Context) error {
 func (h *apiHandler) ListStories(c echo.Context) error {
 	stories, err := h.dbClient.ListStories(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, fmt.Errorf("Error retrieving stories from db. %w", err))
+		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving stories"))
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"items": stories,
@@ -74,9 +78,16 @@ func (h *apiHandler) ListStories(c echo.Context) error {
 func (h *apiHandler) ListJobs(c echo.Context) error {
 	jobs, err := h.dbClient.ListJobs(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, fmt.Errorf("Error retrieving jobs from db. %w", err))
+		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving jobs"))
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"items": jobs,
 	})
+}
+
+func (h *apiHandler) errorResponse(err error, errMsg string) map[string]interface{} {
+	return map[string]interface{}{
+		"error_message": errMsg,
+		"error":         err,
+	}
 }
