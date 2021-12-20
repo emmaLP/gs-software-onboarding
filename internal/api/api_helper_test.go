@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,7 +25,7 @@ func setupRequest(t *testing.T, path string) (*httptest.ResponseRecorder, echo.C
 }
 
 type successResponse struct {
-	Items []hnModel.Item `json:"items"`
+	Items []commonModel.Item `json:"items"`
 }
 
 func decodeRequest(t *testing.T, body io.Reader) (res successResponse) {

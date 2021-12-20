@@ -6,16 +6,15 @@ import (
 	"strings"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	tc "github.com/romnn/testcontainers"
 	tcMongo "github.com/romnn/testcontainers/mongo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +39,7 @@ func TestSaveItem(t *testing.T) {
 	defer mongo.Terminate(context.TODO())
 	tests := map[string]struct {
 		config      *model.DatabaseConfig
-		item        *hnModel.Item
+		item        *commonModel.Item
 		expectedErr string
 	}{
 		"Successfully saved": {
@@ -51,7 +50,7 @@ func TestSaveItem(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "test",
 			},
-			item: &hnModel.Item{
+			item: &commonModel.Item{
 				ID:      1,
 				Dead:    true,
 				Deleted: false,
@@ -65,7 +64,7 @@ func TestSaveItem(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "",
 			},
-			item:        &hnModel.Item{},
+			item:        &commonModel.Item{},
 			expectedErr: "Unable to save item. the Database field must be set on Operation",
 		},
 	}
@@ -101,13 +100,13 @@ func TestListAll(t *testing.T) {
 	require.NotNil(t, dbConfig)
 	defer mongo.Terminate(context.TODO())
 
-	item1 := hnModel.Item{
+	item1 := commonModel.Item{
 		ID:      1,
 		Dead:    true,
 		Deleted: false,
 		Type:    "story",
 	}
-	item2 := hnModel.Item{
+	item2 := commonModel.Item{
 		ID:      2,
 		Dead:    true,
 		Deleted: false,
@@ -116,8 +115,8 @@ func TestListAll(t *testing.T) {
 
 	tests := map[string]struct {
 		config           *model.DatabaseConfig
-		expectedResponse []*hnModel.Item
-		itemsToSave      []*hnModel.Item
+		expectedResponse []*commonModel.Item
+		itemsToSave      []*commonModel.Item
 		expectedErr      string
 	}{
 		"No db": {
@@ -138,10 +137,10 @@ func TestListAll(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "test",
 			},
-			expectedResponse: []*hnModel.Item{
+			expectedResponse: []*commonModel.Item{
 				&item1,
 			},
-			itemsToSave: []*hnModel.Item{
+			itemsToSave: []*commonModel.Item{
 				&item1,
 			},
 		},
@@ -153,10 +152,10 @@ func TestListAll(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "test",
 			},
-			expectedResponse: []*hnModel.Item{
+			expectedResponse: []*commonModel.Item{
 				&item1, &item2,
 			},
-			itemsToSave: []*hnModel.Item{
+			itemsToSave: []*commonModel.Item{
 				&item1, &item2,
 			},
 		},
@@ -199,19 +198,19 @@ func TestListStories(t *testing.T) {
 	require.NotNil(t, dbConfig)
 	defer mongo.Terminate(context.TODO())
 
-	story1 := hnModel.Item{
+	story1 := commonModel.Item{
 		ID:      1,
 		Dead:    true,
 		Deleted: false,
 		Type:    "story",
 	}
-	story2 := hnModel.Item{
+	story2 := commonModel.Item{
 		ID:      3,
 		Dead:    false,
 		Deleted: false,
 		Type:    "story",
 	}
-	job1 := hnModel.Item{
+	job1 := commonModel.Item{
 		ID:      2,
 		Dead:    true,
 		Deleted: false,
@@ -220,8 +219,8 @@ func TestListStories(t *testing.T) {
 
 	tests := map[string]struct {
 		config           *model.DatabaseConfig
-		expectedResponse []*hnModel.Item
-		itemsToSave      []*hnModel.Item
+		expectedResponse []*commonModel.Item
+		itemsToSave      []*commonModel.Item
 		expectedErr      string
 	}{
 		"No db": {
@@ -242,10 +241,10 @@ func TestListStories(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "stories",
 			},
-			expectedResponse: []*hnModel.Item{
+			expectedResponse: []*commonModel.Item{
 				&story1,
 			},
-			itemsToSave: []*hnModel.Item{
+			itemsToSave: []*commonModel.Item{
 				&story1, &job1,
 			},
 		},
@@ -257,10 +256,10 @@ func TestListStories(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "stories",
 			},
-			expectedResponse: []*hnModel.Item{
+			expectedResponse: []*commonModel.Item{
 				&story1, &story2,
 			},
-			itemsToSave: []*hnModel.Item{
+			itemsToSave: []*commonModel.Item{
 				&story1, &story2, &job1,
 			},
 		},
@@ -304,19 +303,19 @@ func TestListJobs(t *testing.T) {
 	require.NotNil(t, dbConfig)
 	defer mongo.Terminate(context.TODO())
 
-	story1 := hnModel.Item{
+	story1 := commonModel.Item{
 		ID:      1,
 		Dead:    true,
 		Deleted: false,
 		Type:    "story",
 	}
-	job2 := hnModel.Item{
+	job2 := commonModel.Item{
 		ID:      3,
 		Dead:    false,
 		Deleted: false,
 		Type:    "job",
 	}
-	job1 := hnModel.Item{
+	job1 := commonModel.Item{
 		ID:      2,
 		Dead:    true,
 		Deleted: false,
@@ -325,8 +324,8 @@ func TestListJobs(t *testing.T) {
 
 	tests := map[string]struct {
 		config           *model.DatabaseConfig
-		expectedResponse []*hnModel.Item
-		itemsToSave      []*hnModel.Item
+		expectedResponse []*commonModel.Item
+		itemsToSave      []*commonModel.Item
 		expectedErr      string
 	}{
 		"No db": {
@@ -347,10 +346,10 @@ func TestListJobs(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "jobs",
 			},
-			expectedResponse: []*hnModel.Item{
+			expectedResponse: []*commonModel.Item{
 				&job1,
 			},
-			itemsToSave: []*hnModel.Item{
+			itemsToSave: []*commonModel.Item{
 				&story1, &job1,
 			},
 		},
@@ -362,10 +361,10 @@ func TestListJobs(t *testing.T) {
 				Port:     fmt.Sprint(dbConfig.Port),
 				Name:     "jobs",
 			},
-			expectedResponse: []*hnModel.Item{
+			expectedResponse: []*commonModel.Item{
 				&job1, &job2,
 			},
-			itemsToSave: []*hnModel.Item{
+			itemsToSave: []*commonModel.Item{
 				&story1, &job1, &job2,
 			},
 		},

@@ -13,11 +13,11 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
 	logger, err := logging.New()
 	if err != nil {
 		log.Fatal("Failed to configure the logger", err)
 	}
-
 	defer func(logger *zap.Logger) {
 		err := logger.Sync()
 		if err != nil {

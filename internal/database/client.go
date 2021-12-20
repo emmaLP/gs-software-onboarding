@@ -6,21 +6,20 @@ import (
 	"log"
 	"strings"
 
-	"go.mongodb.org/mongo-driver/mongo/readpref"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
-	hnModel "github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.uber.org/zap"
 )
 
 type Client interface {
-	SaveItem(ctx context.Context, item *hnModel.Item) error
-	ListAll(ctx context.Context) ([]*hnModel.Item, error)
-	ListStories(ctx context.Context) ([]*hnModel.Item, error)
-	ListJobs(ctx context.Context) ([]*hnModel.Item, error)
+	SaveItem(ctx context.Context, item *commonModel.Item) error
+	ListAll(ctx context.Context) ([]*commonModel.Item, error)
+	ListStories(ctx context.Context) ([]*commonModel.Item, error)
+	ListJobs(ctx context.Context) ([]*commonModel.Item, error)
 	CloseConnection(ctx context.Context)
 }
 
@@ -67,7 +66,7 @@ func New(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig) 
 	}
 }
 
-func (d *database) SaveItem(ctx context.Context, item *hnModel.Item) error {
+func (d *database) SaveItem(ctx context.Context, item *commonModel.Item) error {
 	collection := d.getCollection("items")
 	opts := options.Update().SetUpsert(true)
 
@@ -82,24 +81,24 @@ func (d *database) SaveItem(ctx context.Context, item *hnModel.Item) error {
 	return nil
 }
 
-func (d *database) ListAll(ctx context.Context) ([]*hnModel.Item, error) {
+func (d *database) ListAll(ctx context.Context) ([]*commonModel.Item, error) {
 	return d.find(ctx, bson.M{})
 }
 
-func (d *database) ListStories(ctx context.Context) ([]*hnModel.Item, error) {
+func (d *database) ListStories(ctx context.Context) ([]*commonModel.Item, error) {
 	filter := bson.M{"type": "story"}
 	return d.find(ctx, filter)
 }
 
-func (d *database) ListJobs(ctx context.Context) ([]*hnModel.Item, error) {
+func (d *database) ListJobs(ctx context.Context) ([]*commonModel.Item, error) {
 	filter := bson.M{"type": "job"}
 	return d.find(ctx, filter)
 }
 
-func (d *database) find(ctx context.Context, filter interface{}) ([]*hnModel.Item, error) {
+func (d *database) find(ctx context.Context, filter interface{}) ([]*commonModel.Item, error) {
 	collection := d.getCollection("items")
 	all, err := collection.Find(ctx, filter)
-	var items []*hnModel.Item
+	var items []*commonModel.Item
 	if err != nil {
 		return nil, fmt.Errorf("Failed to retrieve items. %w", err)
 	}

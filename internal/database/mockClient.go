@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 
-	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	"github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	"github.com/stretchr/testify/mock"
 )
 
