@@ -30,8 +30,13 @@ services:
       dockerfile: Dockerfile
       target: api
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
-      API_ADDRESS: ":8080"
+      - API_ADDRESS=:8080
+      - DATABASE_USERNAME=admin
+      - DATABASE_PASSWORD=admin
+      - DATABASE_HOST=mongo
+      - DATABASE_PORT=27017
+      - DATABASE_NAME=hackernews
     depends_on:
       - mongo
