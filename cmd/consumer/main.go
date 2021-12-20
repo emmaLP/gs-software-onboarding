@@ -6,10 +6,9 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/logging"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/consumer"
+	"github.com/emmaLP/gs-software-onboarding/internal/logging"
 	"go.uber.org/zap"
 )
 
