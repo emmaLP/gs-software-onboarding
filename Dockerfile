@@ -22,9 +22,16 @@ COPY ./cmd/ ./cmd/
 COPY ./internal/ ./internal/
 COPY ./pkg/ ./pkg/
 RUN GOOS=linux GOARCH=amd64 go build -o ./bin/consumer ./cmd/consumer
+RUN GOOS=linux GOARCH=amd64 go build -o ./bin/api ./cmd/api
 
 FROM scratch as consumer
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=user /scratchpasswd /etc/passwd
 COPY --from=build /code/bin/consumer .
 ENTRYPOINT ["./consumer"]
+
+FROM scratch as api
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=user /scratchpasswd /etc/passwd
+COPY --from=build /code/bin/api .
+ENTRYPOINT ["./api"]

@@ -3,7 +3,6 @@ package consumer
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/database"
@@ -61,7 +60,7 @@ func (s *service) processStories(ctx context.Context) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			s.saveItem(topStoriesChan)
+			s.saveItem(ctx, topStoriesChan)
 		}()
 	}
 
@@ -84,14 +83,13 @@ func (s *service) processStories(ctx context.Context) error {
 	return nil
 }
 
-func (s *service) saveItem(topStoriesChan <-chan int) {
+func (s *service) saveItem(ctx context.Context, topStoriesChan <-chan int) {
 	for storyId := range topStoriesChan {
 		item, err := s.hnClient.GetItem(storyId)
 		if err != nil {
 			s.logger.Error("An error occurred when trying to fetch the item.", zap.Error(err))
 		} else if !item.Deleted && !item.Dead {
-			log.Println(item)
-			err := s.dbClient.SaveItem(item)
+			err := s.dbClient.SaveItem(ctx, item)
 			if err != nil {
 				s.logger.Error("Failed to save item", zap.Error(err))
 			}

@@ -3,6 +3,7 @@ package model
 type Configuration struct {
 	Consumer ConsumerConfig `mapstructure:",squash"`
 	Database DatabaseConfig `mapstructure:",squash"`
+	Api      APIConfig      `mapstructure:",squash"`
 }
 
 type ConsumerConfig struct {
@@ -17,4 +18,8 @@ type DatabaseConfig struct {
 	Host     string `mapstructure:"database_host"`
 	Port     string `mapstructure:"database_port"`
 	Name     string `mapstructure:"database_name"`
+}
+
+type APIConfig struct {
+	Address string `mapstructure:"api_address"`
 }

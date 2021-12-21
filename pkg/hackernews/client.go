@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/emmaLP/gs-software-onboarding/pkg/hackernews/model"
+	"github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 )
 
 type Client interface {

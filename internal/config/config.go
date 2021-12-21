@@ -50,4 +50,6 @@ func bindEnvs(v *viper.Viper, config model.Configuration) error {
 func setDefaults(v *viper.Viper) {
 	v.SetDefault("cron", "*/15 * * * *")
 	v.SetDefault("workers", 5)
+
+	v.SetDefault("api_address", ":8080")
 }
