@@ -18,7 +18,7 @@ jobs:
         run: go test ./... -coverprofile cover.out
       - name: Quality Gate - Test Coverage
         env:
-          TESTCOVERAGE_THRESHOLD: 60
+          TESTCOVERAGE_THRESHOLD: 65
         run: |
           echo "Quality Gate: checking test coverage is above threshold ..."
           echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"
