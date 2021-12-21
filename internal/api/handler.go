@@ -2,11 +2,9 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/database"
-	"github.com/emmaLP/gs-software-onboarding/internal/model"
+	"github.com/emmaLP/gs-software-onboarding/internal/caching"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
@@ -16,47 +14,27 @@ type Handler interface {
 	GetAll(c echo.Context) error
 	ListStories(c echo.Context) error
 	ListJobs(c echo.Context) error
+	Close(ctx context.Context)
 }
 
 type apiHandler struct {
-	logger   *zap.Logger
-	config   *model.DatabaseConfig
-	dbClient database.Client
+	logger    *zap.Logger
+	itemCache caching.Client
 }
 
 // HandlerOptions give the ability to inject optional struct variables or override others
 type HandlerOptions func(handler *apiHandler)
 
 // NewHandler populates the struct of reusable variables needed for implementing the interface functions
-func NewHandler(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig, opts ...HandlerOptions) (*apiHandler, error) {
-	handler := &apiHandler{
-		logger: logger,
-		config: config,
-	}
-
-	for _, opt := range opts {
-		opt(handler)
-	}
-
-	if handler.dbClient == nil {
-		databaseClient, err := database.New(ctx, logger, config)
-		if err != nil {
-			return nil, fmt.Errorf("Unexpected error when connecting to the database. %w", err)
-		}
-		handler.dbClient = databaseClient
-	}
-	return handler, nil
-}
-
-// WithDatabaseClient is a help func to inject a HandlerOption without needing to write the underlying code
-func WithDatabaseClient(client database.Client) HandlerOptions {
-	return func(h *apiHandler) {
-		h.dbClient = client
-	}
+func NewHandler(logger *zap.Logger, cacheClient caching.Client) (*apiHandler, error) {
+	return &apiHandler{
+		logger:    logger,
+		itemCache: cacheClient,
+	}, nil
 }
 
 func (h *apiHandler) GetAll(c echo.Context) error {
-	all, err := h.dbClient.ListAll(c.Request().Context())
+	all, err := h.itemCache.ListAll(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving items"))
 	}
@@ -66,7 +44,7 @@ func (h *apiHandler) GetAll(c echo.Context) error {
 }
 
 func (h *apiHandler) ListStories(c echo.Context) error {
-	stories, err := h.dbClient.ListStories(c.Request().Context())
+	stories, err := h.itemCache.ListStories(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving stories"))
 	}
@@ -76,7 +54,7 @@ func (h *apiHandler) ListStories(c echo.Context) error {
 }
 
 func (h *apiHandler) ListJobs(c echo.Context) error {
-	jobs, err := h.dbClient.ListJobs(c.Request().Context())
+	jobs, err := h.itemCache.ListJobs(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving jobs"))
 	}

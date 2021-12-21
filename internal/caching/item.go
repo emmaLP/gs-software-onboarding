@@ -13,9 +13,10 @@ import (
 )
 
 type Client interface {
-	GetAll(ctx context.Context) ([]commonModel.Item, error)
-	GetStories(ctx context.Context) ([]commonModel.Item, error)
-	GetJobs(ctx context.Context) ([]commonModel.Item, error)
+	ListAll(ctx context.Context) ([]*commonModel.Item, error)
+	ListStories(ctx context.Context) ([]*commonModel.Item, error)
+	ListJobs(ctx context.Context) ([]*commonModel.Item, error)
+	Close()
 }
 
 type itemCache struct {
@@ -66,81 +67,32 @@ func New(ctx context.Context, redisAddr string, db database.Client, logger *zap.
 	return item, nil
 }
 
-func (c *itemCache) GetAll(ctx context.Context) ([]commonModel.Item, error) {
-	// var items []commonModel.Item
-
+func (c *itemCache) ListAll(ctx context.Context) ([]*commonModel.Item, error) {
 	key := "items:all"
 	return c.cacheItem(key, func(*cache.Item) (interface{}, error) {
 		c.logger.Info(fmt.Sprintf("%s caching missed. fetching from source", key))
-		return c.dbClient.ListJobs(ctx)
+		return c.dbClient.ListAll(ctx)
 	})
-	//err := c.cacheClient.Once(&caching.Item{
-	//	Key:   key,
-	//	Value: &items,
-	//	TTL:   c.ttl,
-	//	Do: func(*caching.Item) (interface{}, error) {
-	//		c.logger.Info(fmt.Sprintf("%s caching missed. fetching from source", key))
-	//		return c.dbClient.ListAll(ctx)
-	//	},
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//return items, nil
 }
 
-func (c *itemCache) GetStories(ctx context.Context) ([]commonModel.Item, error) {
-	// var items []commonModel.Item
-
+func (c *itemCache) ListStories(ctx context.Context) ([]*commonModel.Item, error) {
 	key := "items:stories"
 	return c.cacheItem(key, func(*cache.Item) (interface{}, error) {
 		c.logger.Info(fmt.Sprintf("%s caching missed. fetching from source", key))
-		return c.dbClient.ListJobs(ctx)
+		return c.dbClient.ListStories(ctx)
 	})
-	//err := c.cacheClient.Once(&caching.Item{
-	//	Key:   key,
-	//	Value: &items,
-	//	TTL:   c.ttl,
-	//	Do: func(*caching.Item) (interface{}, error) {
-	//		c.logger.Info(fmt.Sprintf("%s caching missed. fetching from source", key))
-	//		return c.dbClient.ListStories(ctx)
-	//	},
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//return items, nil
 }
 
-func (c *itemCache) GetJobs(ctx context.Context) ([]commonModel.Item, error) {
-	// var items []commonModel.Item
-
+func (c *itemCache) ListJobs(ctx context.Context) ([]*commonModel.Item, error) {
 	key := "items:jobs"
-	//err := c.cacheClient.Once(&caching.Item{
-	//	Key:   key,
-	//	Value: &items,
-	//	TTL:   c.ttl,
-	//	Do: func(*caching.Item) (interface{}, error) {
-	//		c.logger.Info(fmt.Sprintf("%s caching missed. fetching from source", key))
-	//		return c.dbClient.ListJobs(ctx)
-	//	},
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//return items, nil
-
 	return c.cacheItem(key, func(*cache.Item) (interface{}, error) {
 		c.logger.Info(fmt.Sprintf("%s caching missed. fetching from source", key))
 		return c.dbClient.ListJobs(ctx)
 	})
 }
 
-func (c *itemCache) cacheItem(cacheName string, doFunc func(*cache.Item) (interface{}, error)) ([]commonModel.Item, error) {
-	var items []commonModel.Item
+func (c *itemCache) cacheItem(cacheName string, doFunc func(*cache.Item) (interface{}, error)) ([]*commonModel.Item, error) {
+	var items []*commonModel.Item
 
 	err := c.cacheClient.Once(&cache.Item{
 		Key:   cacheName,
@@ -156,5 +108,8 @@ func (c *itemCache) cacheItem(cacheName string, doFunc func(*cache.Item) (interf
 }
 
 func (c *itemCache) Close() {
-	c.ringClient.Close()
+	err := c.ringClient.Close()
+	if err != nil {
+		c.logger.Error("Failed to close connection to database", zap.Error(err))
+	}
 }

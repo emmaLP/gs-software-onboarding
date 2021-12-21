@@ -180,6 +180,7 @@ func TestListAll(t *testing.T) {
 			require.NoError(t, err)
 
 			if testConfig.expectedErr == "" {
+				dropDatabase(dbConfig, testConfig.config.Name)
 				for _, item := range testConfig.itemsToSave {
 					err := client.SaveItem(context.TODO(), item)
 					require.NoError(t, err)

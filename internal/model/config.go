@@ -4,6 +4,7 @@ type Configuration struct {
 	Consumer ConsumerConfig `mapstructure:",squash"`
 	Database DatabaseConfig `mapstructure:",squash"`
 	Api      APIConfig      `mapstructure:",squash"`
+	Cache    CacheConfig    `mapstructure:",squash"`
 }
 
 type ConsumerConfig struct {
@@ -22,4 +23,8 @@ type DatabaseConfig struct {
 
 type APIConfig struct {
 	Address string `mapstructure:"api_address"`
+}
+
+type CacheConfig struct {
+	Address string `mapstructure:"cache_address"`
 }
