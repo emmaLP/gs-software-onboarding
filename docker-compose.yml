@@ -10,6 +10,10 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: gymshark
       MONGODB_ADVERTISED_HOSTNAME: mongo-host
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
   consumer:
     build:
       context: .
@@ -38,5 +42,7 @@ services:
       - DATABASE_HOST=mongo
       - DATABASE_PORT=27017
       - DATABASE_NAME=hackernews
+      - CACHE_ADDRESS=redis:6379
     depends_on:
       - mongo
+      - redis
