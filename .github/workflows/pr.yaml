@@ -15,6 +15,13 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test
-        run: go test ./... -cover
+        run: go test ./... -coverprofile cover.out
       - name: Vet
         run: go vet ./...
+      - name: Quality Gate - Test Coverage
+        env:
+          TESTCOVERAGE_THRESHOLD: 75
+        uses: ./.github/workflows/shared/test-coverage
+        with:
+          coverage_threshold: $TESTCOVERAGE_THRESHOLD
+          test_coverage_file: ./cover.out
