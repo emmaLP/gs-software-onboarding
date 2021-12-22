@@ -19,16 +19,7 @@ jobs:
       - name: Quality Gate - Test Coverage
         env:
           TESTCOVERAGE_THRESHOLD: 75
-        run: |
-          echo "Quality Gate: checking test coverage is above threshold ..."
-          echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"
-          cat cover.out | grep -v "mock" > coverexclude.out
-          totalCoverage=`go tool cover -func=coverexclude.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-          echo "Current test coverage : $totalCoverage %"
-          if (( $(echo "$totalCoverage $TESTCOVERAGE_THRESHOLD" | awk '{print ($1 > $2)}') )); then
-              echo "OK"
-          else
-              echo "Current test coverage is below threshold. Please add more unit tests or adjust threshold to a lower value."
-              echo "Failed"
-              exit 1
-          fi
+        uses: ./.github/workflows/shared/test-coverage
+        with:
+          coverage_threshold: $TESTCOVERAGE_THRESHOLD
+          test_coverage_file: ./cover.out

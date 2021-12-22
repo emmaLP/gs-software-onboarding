@@ -1,0 +1,22 @@
+inputs:
+  coverage_threshold:
+    description: 'Code coverage percent threshold'
+    default: '75'
+  test_coverage_file:
+    description: 'File including path of where the test coverage file is'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Quality Gate: checking test coverage is above threshold ..."
+        echo "Threshold             : ${{ inputs.coverage_threshold }} %"
+        cat ${{ inputs.test_coverage_file }} | grep -v "mock" > coverexclude.out
+        totalCoverage=`go tool cover -func=coverexclude.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+        echo "Current test coverage : $totalCoverage %"
+        if (( $(echo "$totalCoverage $TESTCOVERAGE_THRESHOLD" | awk '{print ($1 > $2)}') )); then
+            echo "OK"
+        else
+            echo "Current test coverage is below threshold. Please add more unit tests or adjust threshold to a lower value."
+            echo "Failed"
+            exit 1
+        fi
