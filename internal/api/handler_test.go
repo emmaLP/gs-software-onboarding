@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/caching"
 	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
@@ -18,16 +19,18 @@ func TestGetAll(t *testing.T) {
 	tests := map[string]struct {
 		dbConfig             *model.DatabaseConfig
 		dbMock               *database.Mock
-		expectedMocks        func(t *testing.T, dbMock *database.Mock)
+		cacheMock            *caching.Mock
+		expectedMocks        func(t *testing.T, dbMock *caching.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
-		"Successfully GetAll": {
+		"Successfully ListAll": {
 			dbConfig:             nil,
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
 			dbMock:               &database.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+			cacheMock:            &caching.Mock{},
+			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
 				dbMock.On("ListAll", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "story"},
 					{ID: 2, Type: "job"},
@@ -39,7 +42,8 @@ func TestGetAll(t *testing.T) {
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
 			dbMock:               &database.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+			cacheMock:            &caching.Mock{},
+			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
 				dbMock.On("ListAll", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
@@ -48,11 +52,11 @@ func TestGetAll(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			logger, err := zap.NewProduction()
 			require.NoError(t, err)
-			handler, err := NewHandler(context.TODO(), logger, testConfig.dbConfig, WithDatabaseClient(testConfig.dbMock))
+			handler, err := NewHandler(logger, testConfig.cacheMock)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.expectedMocks(t, testConfig.dbMock)
+				testConfig.expectedMocks(t, testConfig.cacheMock)
 			}
 			rec, eCtx := setupRequest(t, "/all")
 			err = handler.GetAll(eCtx)
@@ -75,7 +79,8 @@ func TestListStories(t *testing.T) {
 	tests := map[string]struct {
 		dbConfig             *model.DatabaseConfig
 		dbMock               *database.Mock
-		expectedMocks        func(t *testing.T, dbMock *database.Mock)
+		cacheMock            *caching.Mock
+		expectedMocks        func(t *testing.T, dbMock *caching.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
@@ -84,7 +89,8 @@ func TestListStories(t *testing.T) {
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
 			dbMock:               &database.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+			cacheMock:            &caching.Mock{},
+			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
 				dbMock.On("ListStories", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "story"},
 					{ID: 2, Type: "story"},
@@ -96,7 +102,8 @@ func TestListStories(t *testing.T) {
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
 			dbMock:               &database.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+			cacheMock:            &caching.Mock{},
+			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
 				dbMock.On("ListStories", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
@@ -105,11 +112,11 @@ func TestListStories(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			logger, err := zap.NewProduction()
 			require.NoError(t, err)
-			handler, err := NewHandler(context.TODO(), logger, testConfig.dbConfig, WithDatabaseClient(testConfig.dbMock))
+			handler, err := NewHandler(logger, testConfig.cacheMock)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.expectedMocks(t, testConfig.dbMock)
+				testConfig.expectedMocks(t, testConfig.cacheMock)
 			}
 			rec, eCtx := setupRequest(t, "/stories")
 			err = handler.ListStories(eCtx)
@@ -132,7 +139,8 @@ func TestListJobs(t *testing.T) {
 	tests := map[string]struct {
 		dbConfig             *model.DatabaseConfig
 		dbMock               *database.Mock
-		expectedMocks        func(t *testing.T, dbMock *database.Mock)
+		cacheMock            *caching.Mock
+		expectedMocks        func(t *testing.T, dbMock *caching.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
@@ -141,7 +149,8 @@ func TestListJobs(t *testing.T) {
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
 			dbMock:               &database.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+			cacheMock:            &caching.Mock{},
+			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
 				dbMock.On("ListJobs", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "job"},
 					{ID: 2, Type: "job"},
@@ -153,7 +162,8 @@ func TestListJobs(t *testing.T) {
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
 			dbMock:               &database.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+			cacheMock:            &caching.Mock{},
+			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
 				dbMock.On("ListJobs", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
@@ -162,11 +172,11 @@ func TestListJobs(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			logger, err := zap.NewProduction()
 			require.NoError(t, err)
-			handler, err := NewHandler(context.TODO(), logger, testConfig.dbConfig, WithDatabaseClient(testConfig.dbMock))
+			handler, err := NewHandler(logger, testConfig.cacheMock)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.expectedMocks(t, testConfig.dbMock)
+				testConfig.expectedMocks(t, testConfig.cacheMock)
 			}
 			rec, eCtx := setupRequest(t, "/jobs")
 			err = handler.ListJobs(eCtx)
