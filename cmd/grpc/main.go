@@ -35,4 +35,6 @@ func main() {
 		logger.Fatal("Unexpected error when connecting to the database.", zap.Error(err))
 	}
 	defer databaseClient.CloseConnection(ctx)
+
+	// TODO Setup GRPC here
 }
