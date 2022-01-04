@@ -4,6 +4,7 @@ type Configuration struct {
 	Consumer ConsumerConfig `mapstructure:",squash"`
 	Database DatabaseConfig `mapstructure:",squash"`
 	Api      APIConfig      `mapstructure:",squash"`
+	Grpc     GrpcConfig     `mapstructure:",squash"`
 	Cache    CacheConfig    `mapstructure:",squash"`
 }
 
@@ -23,6 +24,10 @@ type DatabaseConfig struct {
 
 type APIConfig struct {
 	Address string `mapstructure:"api_address"`
+}
+
+type GrpcConfig struct {
+	Port int `mapstructure:"grpc_port"`
 }
 
 type CacheConfig struct {
