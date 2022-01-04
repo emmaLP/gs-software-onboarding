@@ -44,6 +44,7 @@ func TestLoadConfig(t *testing.T) {
 				Api: model.APIConfig{
 					Address: ":8080",
 				},
+				Grpc: model.GrpcConfig{Port: 9000},
 			},
 		},
 		"Successfully load config from file": {
@@ -58,6 +59,7 @@ func TestLoadConfig(t *testing.T) {
 				Api: model.APIConfig{
 					Address: ":8080",
 				},
+				Grpc: model.GrpcConfig{Port: 9000},
 			},
 		},
 	}
