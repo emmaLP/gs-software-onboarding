@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/caching"
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/database"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
 	"github.com/emmaLP/gs-software-onboarding/internal/logging"
 	"go.uber.org/zap"
 )
@@ -36,5 +38,16 @@ func main() {
 	}
 	defer databaseClient.CloseConnection(ctx)
 
-	// TODO Setup GRPC here
+	cacheClient, err := caching.New(ctx, configuration.Cache.Address, databaseClient, logger)
+	if err != nil {
+		logger.Fatal("Unexpected error when connecting to the cache.", zap.Error(err))
+	}
+	defer cacheClient.Close()
+	grpcHandler := grpc.Handler{
+		ItemCache: cacheClient,
+	}
+	server := grpc.NewServer(configuration.Grpc.Port, logger, grpcHandler)
+	if err := server.Start(); err != nil {
+		logger.Fatal("Failed to start grpc server:", zap.Error(err))
+	}
 }

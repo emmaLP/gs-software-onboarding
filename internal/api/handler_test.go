@@ -7,8 +7,6 @@ import (
 	"testing"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
-	"github.com/emmaLP/gs-software-onboarding/internal/database"
-	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,34 +15,28 @@ import (
 
 func TestGetAll(t *testing.T) {
 	tests := map[string]struct {
-		dbConfig             *model.DatabaseConfig
-		dbMock               *database.Mock
 		cacheMock            *caching.Mock
-		expectedMocks        func(t *testing.T, dbMock *caching.Mock)
+		expectedMocks        func(t *testing.T, cacheMock *caching.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
 		"Successfully ListAll": {
-			dbConfig:             nil,
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
-			dbMock:               &database.Mock{},
 			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
-				dbMock.On("ListAll", context.TODO()).Return([]*commonModel.Item{
+			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
+				cacheMock.On("ListAll", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "story"},
 					{ID: 2, Type: "job"},
 				}, nil)
 			},
 		},
 		"Failed to get data": {
-			dbConfig:             nil,
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
-			dbMock:               &database.Mock{},
 			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
-				dbMock.On("ListAll", context.TODO()).Return(nil, errors.New("Failed to find item"))
+			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
+				cacheMock.On("ListAll", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
 	}
@@ -63,7 +55,7 @@ func TestGetAll(t *testing.T) {
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.dbMock.AssertExpectations(t)
+				testConfig.cacheMock.AssertExpectations(t)
 			}
 			assert.Equal(t, testConfig.expectedStatusCode, rec.Code)
 			if testConfig.expectedStatusCode == http.StatusOK {
@@ -77,34 +69,28 @@ func TestGetAll(t *testing.T) {
 
 func TestListStories(t *testing.T) {
 	tests := map[string]struct {
-		dbConfig             *model.DatabaseConfig
-		dbMock               *database.Mock
 		cacheMock            *caching.Mock
-		expectedMocks        func(t *testing.T, dbMock *caching.Mock)
+		expectedMocks        func(t *testing.T, cacheMock *caching.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
 		"Successfully ListStories": {
-			dbConfig:             nil,
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
-			dbMock:               &database.Mock{},
 			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
-				dbMock.On("ListStories", context.TODO()).Return([]*commonModel.Item{
+			expectedMocks: func(t *testing.T, cachMock *caching.Mock) {
+				cachMock.On("ListStories", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "story"},
 					{ID: 2, Type: "story"},
 				}, nil)
 			},
 		},
 		"Failed to get data": {
-			dbConfig:             nil,
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
-			dbMock:               &database.Mock{},
 			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
-				dbMock.On("ListStories", context.TODO()).Return(nil, errors.New("Failed to find item"))
+			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
+				cacheMock.On("ListStories", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
 	}
@@ -123,7 +109,7 @@ func TestListStories(t *testing.T) {
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.dbMock.AssertExpectations(t)
+				testConfig.cacheMock.AssertExpectations(t)
 			}
 			assert.Equal(t, testConfig.expectedStatusCode, rec.Code)
 			if testConfig.expectedStatusCode == http.StatusOK {
@@ -137,34 +123,28 @@ func TestListStories(t *testing.T) {
 
 func TestListJobs(t *testing.T) {
 	tests := map[string]struct {
-		dbConfig             *model.DatabaseConfig
-		dbMock               *database.Mock
 		cacheMock            *caching.Mock
-		expectedMocks        func(t *testing.T, dbMock *caching.Mock)
+		expectedMocks        func(t *testing.T, cacheMock *caching.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
 		"Successfully ListJobs": {
-			dbConfig:             nil,
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
-			dbMock:               &database.Mock{},
 			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
-				dbMock.On("ListJobs", context.TODO()).Return([]*commonModel.Item{
+			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
+				cacheMock.On("ListJobs", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "job"},
 					{ID: 2, Type: "job"},
 				}, nil)
 			},
 		},
 		"Failed to get data": {
-			dbConfig:             nil,
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
-			dbMock:               &database.Mock{},
 			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, dbMock *caching.Mock) {
-				dbMock.On("ListJobs", context.TODO()).Return(nil, errors.New("Failed to find item"))
+			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
+				cacheMock.On("ListJobs", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
 	}
@@ -183,7 +163,7 @@ func TestListJobs(t *testing.T) {
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.dbMock.AssertExpectations(t)
+				testConfig.cacheMock.AssertExpectations(t)
 			}
 			assert.Equal(t, testConfig.expectedStatusCode, rec.Code)
 			if testConfig.expectedStatusCode == http.StatusOK {

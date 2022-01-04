@@ -6,8 +6,10 @@ require (
 	github.com/alicebob/miniredis/v2 v2.17.0
 	github.com/go-redis/cache/v8 v8.4.3
 	github.com/go-redis/redis/v8 v8.11.4
+	github.com/golang/mock v1.6.0
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/mitchellh/mapstructure v1.4.2
+	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/romnn/testcontainers v0.2.1
 	github.com/spf13/viper v1.9.0
@@ -15,6 +17,8 @@ require (
 	github.com/testcontainers/testcontainers-go v0.12.0
 	go.mongodb.org/mongo-driver v1.8.0
 	go.uber.org/zap v1.17.0
+	google.golang.org/grpc v1.40.0
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -58,7 +62,6 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.0.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/common v0.15.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
@@ -89,8 +92,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
-	google.golang.org/grpc v1.40.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

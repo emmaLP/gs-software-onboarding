@@ -23,7 +23,8 @@ type DatabaseConfig struct {
 }
 
 type APIConfig struct {
-	Address string `mapstructure:"api_address"`
+	Address     string `mapstructure:"api_address"`
+	GrpcAddress string `mapstructure:"grpc_address"`
 }
 
 type GrpcConfig struct {
