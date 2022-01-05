@@ -19,7 +19,7 @@ func TestNewServer(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 
-	logger, err := zap.NewProduction()
+	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
 	apiServer := NewServer(1234, logger, pbMock.NewMockAPIServer(controller))
