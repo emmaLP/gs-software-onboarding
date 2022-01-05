@@ -5,7 +5,6 @@ import (
 	"net"
 
 	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -25,19 +24,19 @@ func NewServer(port int, logger *zap.Logger, srv pb.APIServer) *server {
 }
 
 // Start the GRPC server
-func (s *server) Start() error {
+func (s *server) Start() (*grpc.Server, error) {
 	s.logger.Debug(fmt.Sprintf("starting server on port %d", s.port))
 
 	listenPort, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
-		return errors.Wrap(err, "failed to listenPort")
+		return nil, fmt.Errorf("failed to listen on port, %w", err)
 	}
 
 	gs := grpc.NewServer()
 	pb.RegisterAPIServer(gs, s.srv)
 	if err := gs.Serve(listenPort); err != nil {
-		return errors.Wrap(err, "failed to serve")
+		return nil, fmt.Errorf("failed to serve. %w", err)
 	}
 
-	return nil
+	return gs, nil
 }

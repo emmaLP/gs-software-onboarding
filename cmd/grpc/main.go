@@ -47,7 +47,9 @@ func main() {
 		ItemCache: cacheClient,
 	}
 	server := grpc.NewServer(configuration.Grpc.Port, logger, grpcHandler)
-	if err := server.Start(); err != nil {
+	grpcServer, err := server.Start()
+	if err != nil {
 		logger.Fatal("Failed to start grpc server:", zap.Error(err))
 	}
+	defer grpcServer.Stop()
 }
