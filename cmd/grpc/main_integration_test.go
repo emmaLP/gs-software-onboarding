@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"testing"
 	"time"
 
@@ -19,8 +18,6 @@ import (
 	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -135,23 +132,4 @@ func (h *testHandler) saveItemToDatabase(t *testing.T, item *commonModel.Item) {
 
 func (h *testHandler) address() string {
 	return fmt.Sprintf("%s:%d", "localhost", h.config.Grpc.Port)
-}
-
-func (h *testHandler) dropDatabase(ctx context.Context) {
-	dbConfig := h.config.Database
-	opts := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s", dbConfig.Host, dbConfig.Port))
-	if strings.TrimSpace(dbConfig.Username) != "" && strings.TrimSpace(dbConfig.Password) != "" {
-		credentials := options.Credential{
-			Username: dbConfig.Username,
-			Password: dbConfig.Password,
-		}
-		opts = opts.SetAuth(credentials)
-	}
-	client, _ := mongo.Connect(ctx, opts)
-	defer client.Disconnect(ctx)
-
-	database := client.Database(dbConfig.Name)
-	collection := database.Collection("items")
-	collection.Drop(ctx)
-	database.Drop(ctx)
 }
