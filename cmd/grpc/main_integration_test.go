@@ -5,22 +5,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/database"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
-	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type testHandler struct {
@@ -73,32 +69,19 @@ func TestGrpcServer_ListStories(t *testing.T) {
 				handler.saveItemToDatabase(t, item)
 			}
 
-			grpcConnection, err := grpc.Dial(handler.address(), grpc.WithInsecure())
+			client, err := grpc.NewClient(handler.config.Api.GrpcAddress, handler.logger)
 			assert.NoError(t, err)
-			defer grpcConnection.Close()
+			defer client.Close()
 
-			client := pb.NewAPIClient(grpcConnection)
-
-			storiesSteam, err := client.ListStories(ctx, &emptypb.Empty{})
+			stories, err := client.ListStories(ctx)
 			assert.NoError(t, err)
-			assert.NotNil(t, storiesSteam)
+			assert.NotNil(t, stories)
 
-			for _, expectedItem := range testConfig.expectedResponse {
-				out, err := storiesSteam.Recv()
-				if err == nil {
-					actualItem := commonModel.PItemToItem(out)
-					assert.Equal(t, expectedItem, &actualItem)
-				} else {
-					t.Fatal("Unexpected error:", err)
-				}
-			}
-
-			lastRecv, err := storiesSteam.Recv()
-			log.Println(lastRecv)
-			assert.Equal(t, io.EOF, err)
+			assert.Len(t, stories, len(testConfig.expectedResponse))
+			assert.Equal(t, testConfig.expectedResponse, stories)
 
 			t.Cleanup(func() {
-				grpcConnection.Close()
+				client.Close()
 				handler.dbClient.CloseConnection(ctx)
 				handler.cacheClient.Close()
 			})

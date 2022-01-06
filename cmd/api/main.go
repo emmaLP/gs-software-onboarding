@@ -27,7 +27,7 @@ func main() {
 		logger.Fatal("Failed to load config", zap.Error(err))
 	}
 
-	grpcClient, err := grpc.New(configuration.Api.GrpcAddress, logger)
+	grpcClient, err := grpc.NewClient(configuration.Api.GrpcAddress, logger)
 	if err != nil {
 		logger.Fatal("Unable to create GRPC client.", zap.Error(err))
 	}
