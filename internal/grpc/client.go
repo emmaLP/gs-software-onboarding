@@ -13,9 +13,9 @@ import (
 )
 
 type Client interface {
-	ListAll(ctx context.Context) ([]model.Item, error)
-	ListStories(ctx context.Context) ([]model.Item, error)
-	ListJobs(ctx context.Context) ([]model.Item, error)
+	ListAll(ctx context.Context) ([]*model.Item, error)
+	ListStories(ctx context.Context) ([]*model.Item, error)
+	ListJobs(ctx context.Context) ([]*model.Item, error)
 }
 
 type client struct {
@@ -24,7 +24,7 @@ type client struct {
 	logger         *zap.Logger
 }
 
-func New(addr string) (*client, error) {
+func New(addr string, logger *zap.Logger) (*client, error) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("connecting to grpc server with address %s. Error: %w", addr, err)
@@ -35,10 +35,11 @@ func New(addr string) (*client, error) {
 	return &client{
 		grpcClient:     apiClient,
 		grpcConnection: conn,
+		logger:         logger,
 	}, nil
 }
 
-func (c *client) ListAll(ctx context.Context) ([]model.Item, error) {
+func (c *client) ListAll(ctx context.Context) ([]*model.Item, error) {
 	stream, err := c.grpcClient.ListAll(ctx, &emptypb.Empty{})
 	if err != nil {
 		return nil, fmt.Errorf("An error occurred when streaming all. %w", err)
@@ -46,7 +47,7 @@ func (c *client) ListAll(ctx context.Context) ([]model.Item, error) {
 	return handleStreamItems(ctx, stream)
 }
 
-func (c *client) ListStories(ctx context.Context) ([]model.Item, error) {
+func (c *client) ListStories(ctx context.Context) ([]*model.Item, error) {
 	stream, err := c.grpcClient.ListStories(ctx, &emptypb.Empty{})
 	if err != nil {
 		return nil, fmt.Errorf("An error occurred when streaming stories. %w", err)
@@ -54,7 +55,7 @@ func (c *client) ListStories(ctx context.Context) ([]model.Item, error) {
 	return handleStreamItems(ctx, stream)
 }
 
-func (c *client) ListJobs(ctx context.Context) ([]model.Item, error) {
+func (c *client) ListJobs(ctx context.Context) ([]*model.Item, error) {
 	stream, err := c.grpcClient.ListJobs(ctx, &emptypb.Empty{})
 	if err != nil {
 		return nil, fmt.Errorf("An error occurred when streaming jobs. %w", err)
@@ -69,8 +70,8 @@ func (c *client) Close() {
 	}
 }
 
-func handleStreamItems(ctx context.Context, stream interface{ Recv() (*pb.Item, error) }) ([]model.Item, error) {
-	var items []model.Item
+func handleStreamItems(ctx context.Context, stream interface{ Recv() (*pb.Item, error) }) ([]*model.Item, error) {
+	var items []*model.Item
 	isComplete := false
 	for !isComplete {
 		select {
@@ -86,7 +87,8 @@ func handleStreamItems(ctx context.Context, stream interface{ Recv() (*pb.Item, 
 					return nil, fmt.Errorf("receiving item from server. %w", err)
 				}
 			}
-			items = append(items, model.PItemToItem(pbItem))
+			item := model.PItemToItem(pbItem)
+			items = append(items, &item)
 		}
 	}
 	return items, nil
