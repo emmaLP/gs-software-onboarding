@@ -4,15 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	"google.golang.org/grpc"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
-
 	pbMock "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 func TestNewServer(t *testing.T) {
