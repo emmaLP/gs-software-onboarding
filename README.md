@@ -48,15 +48,5 @@ The GRPC service support communication between services
 If you update the `.proto` then you need to run the following command:
 
 ```bash
-protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/grpc/proto/hackernews.proto 
-```
-
-Now we need to generate updated mocks
-
-```bash
-# If you don't have mockgen installed
-go install github.com/golang/mock/mockgen
-
-mockgen -source=pkg/grpc/proto/hackernews_grpc.pb.go -destination=pkg/grpc/proto/mockClient.go
-
+make proto
 ```
