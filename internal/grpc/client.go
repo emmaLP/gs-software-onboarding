@@ -24,13 +24,16 @@ type client struct {
 	logger         *zap.Logger
 }
 
-func New(addr string, logger *zap.Logger) (*client, error) {
+// NewClient instantiates a connection to a grpc server
+func NewClient(addr string, logger *zap.Logger) (*client, error) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("connecting to grpc server with address %s. Error: %w", addr, err)
 	}
+	logger.Debug("Connected to GRPC server successfully")
 
 	apiClient := pb.NewAPIClient(conn)
+	logger.Debug("GRPC Client instantiated")
 
 	return &client{
 		grpcClient:     apiClient,
