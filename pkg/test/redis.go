@@ -15,6 +15,7 @@ type RedisContainer struct {
 	URI       string
 }
 
+// SetupRedis run a redic docker container as part of tests. This requires docker.sock to be running
 func SetupRedis(ctx context.Context) (*RedisContainer, error) {
 	req := testcontainers.ContainerRequest{
 		Image:        "redis:alpine",

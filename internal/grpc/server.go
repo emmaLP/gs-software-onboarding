@@ -15,6 +15,7 @@ type server struct {
 	logger *zap.Logger
 }
 
+// NewServer instantiates the struct for use when starting the GRPC server
 func NewServer(port int, logger *zap.Logger, srv pb.APIServer) *server {
 	return &server{
 		port:   port,
