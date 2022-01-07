@@ -38,6 +38,5 @@ func (s *server) Start() (*grpc.Server, error) {
 	if err := gs.Serve(listenPort); err != nil {
 		return nil, fmt.Errorf("failed to serve. %w", err)
 	}
-
 	return gs, nil
 }

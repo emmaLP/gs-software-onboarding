@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	os.Setenv("DATABASE_NAME", "int-test")
+	os.Setenv("DATABASE_NAME", "int-test-grpc")
 	os.Setenv("DATABASE_USERNAME", dbConfig.User)
 	os.Setenv("DATABASE_PASSWORD", dbConfig.Password)
 	os.Setenv("DATABASE_HOST", dbConfig.Host)
