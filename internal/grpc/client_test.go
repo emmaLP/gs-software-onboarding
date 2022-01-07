@@ -7,13 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
+	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-
-	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 )
 
 func TestListAll(t *testing.T) {
