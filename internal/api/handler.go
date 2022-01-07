@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
@@ -18,23 +18,23 @@ type Handler interface {
 }
 
 type apiHandler struct {
-	logger    *zap.Logger
-	itemCache caching.Client
+	logger     *zap.Logger
+	grpcClient grpc.Client
 }
 
 // HandlerOptions give the ability to inject optional struct variables or override others
 type HandlerOptions func(handler *apiHandler)
 
 // NewHandler populates the struct of reusable variables needed for implementing the interface functions
-func NewHandler(logger *zap.Logger, cacheClient caching.Client) (*apiHandler, error) {
+func NewHandler(logger *zap.Logger, client grpc.Client) (*apiHandler, error) {
 	return &apiHandler{
-		logger:    logger,
-		itemCache: cacheClient,
+		logger:     logger,
+		grpcClient: client,
 	}, nil
 }
 
 func (h *apiHandler) GetAll(c echo.Context) error {
-	all, err := h.itemCache.ListAll(c.Request().Context())
+	all, err := h.grpcClient.ListAll(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving items"))
 	}
@@ -44,7 +44,7 @@ func (h *apiHandler) GetAll(c echo.Context) error {
 }
 
 func (h *apiHandler) ListStories(c echo.Context) error {
-	stories, err := h.itemCache.ListStories(c.Request().Context())
+	stories, err := h.grpcClient.ListStories(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving stories"))
 	}
@@ -54,7 +54,7 @@ func (h *apiHandler) ListStories(c echo.Context) error {
 }
 
 func (h *apiHandler) ListJobs(c echo.Context) error {
-	jobs, err := h.itemCache.ListJobs(c.Request().Context())
+	jobs, err := h.grpcClient.ListJobs(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, h.errorResponse(err, "Error retrieving jobs"))
 	}

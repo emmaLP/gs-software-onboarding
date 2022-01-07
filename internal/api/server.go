@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
@@ -20,7 +20,7 @@ type ClientServer interface {
 }
 
 // NewServer creates a new http server
-func NewServer(logger *zap.Logger, itemStorage caching.Client) (*server, error) {
+func NewServer(logger *zap.Logger, client grpc.Client) (*server, error) {
 	router := echo.New()
 	router.HideBanner = true
 	router.Use(
@@ -30,7 +30,7 @@ func NewServer(logger *zap.Logger, itemStorage caching.Client) (*server, error) 
 	router.GET("/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "ok")
 	})
-	handler, err := NewHandler(logger, itemStorage)
+	handler, err := NewHandler(logger, client)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create the API handler. %w", err)
 	}

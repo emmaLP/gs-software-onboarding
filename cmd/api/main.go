@@ -1,21 +1,16 @@
 package main
 
 import (
-	"context"
 	"log"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/api"
-	"github.com/emmaLP/gs-software-onboarding/internal/caching"
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
-	"github.com/emmaLP/gs-software-onboarding/internal/database"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
 	"github.com/emmaLP/gs-software-onboarding/internal/logging"
 	"go.uber.org/zap"
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	logger, err := logging.New()
 	if err != nil {
 		log.Fatal("Failed to configure the logger", err)
@@ -32,21 +27,17 @@ func main() {
 		logger.Fatal("Failed to load config", zap.Error(err))
 	}
 
-	databaseClient, err := database.New(ctx, logger, &configuration.Database)
+	grpcClient, err := grpc.NewClient(configuration.Api.GrpcAddress, logger)
 	if err != nil {
-		logger.Fatal("Unexpected error when connecting to the database.", zap.Error(err))
+		logger.Fatal("Unable to create GRPC client.", zap.Error(err))
 	}
-	defer databaseClient.CloseConnection(ctx)
+	defer grpcClient.Close()
+	logger.Info("GRPC client connected to server")
 
-	cacheClient, err := caching.New(ctx, configuration.Cache.Address, databaseClient, logger)
-	if err != nil {
-		logger.Fatal("Unexpected error when connecting to the cache.", zap.Error(err))
-	}
-	defer cacheClient.Close()
-
-	server, err := api.NewServer(logger, cacheClient)
+	server, err := api.NewServer(logger, grpcClient)
 	if err != nil {
 		logger.Fatal("Unable to instantiate api server", zap.Error(err))
 	}
+	logger.Debug("Starting api server")
 	server.StartServer(configuration.Api.Address)
 }

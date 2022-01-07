@@ -16,7 +16,8 @@ import (
 
 func TestMain(m *testing.M) {
 	log.Println("Starting integration tests")
-	os.Setenv("GRPC_PORT", strconv.Itoa(randomPort()))
+	grpcPort := strconv.Itoa(randomPort())
+	os.Setenv("GRPC_PORT", grpcPort)
 
 	ctx := context.TODO()
 	_, dbConfig, err := test.SetupMongoContainer(ctx)
@@ -25,7 +26,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	os.Setenv("DATABASE_NAME", "int-test")
+	os.Setenv("DATABASE_NAME", "int-test-grpc")
 	os.Setenv("DATABASE_USERNAME", dbConfig.User)
 	os.Setenv("DATABASE_PASSWORD", dbConfig.Password)
 	os.Setenv("DATABASE_HOST", dbConfig.Host)
@@ -37,6 +38,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	os.Setenv("CACHE_ADDRESS", redis.URI)
+	os.Setenv("GRPC_ADDRESS", fmt.Sprintf("localhost:%s", grpcPort))
 
 	go func() {
 		main()

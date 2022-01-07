@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,17 +15,17 @@ import (
 
 func TestGetAll(t *testing.T) {
 	tests := map[string]struct {
-		cacheMock            *caching.Mock
-		expectedMocks        func(t *testing.T, cacheMock *caching.Mock)
+		grpcMock             *grpc.Mock
+		expectedMocks        func(t *testing.T, grpcMock *grpc.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
 		"Successfully ListAll": {
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
-			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
-				cacheMock.On("ListAll", context.TODO()).Return([]*commonModel.Item{
+			grpcMock:             &grpc.Mock{},
+			expectedMocks: func(t *testing.T, grpcMock *grpc.Mock) {
+				grpcMock.On("ListAll", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "story"},
 					{ID: 2, Type: "job"},
 				}, nil)
@@ -34,9 +34,9 @@ func TestGetAll(t *testing.T) {
 		"Failed to get data": {
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
-			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
-				cacheMock.On("ListAll", context.TODO()).Return(nil, errors.New("Failed to find item"))
+			grpcMock:             &grpc.Mock{},
+			expectedMocks: func(t *testing.T, grpcMock *grpc.Mock) {
+				grpcMock.On("ListAll", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
 	}
@@ -44,18 +44,18 @@ func TestGetAll(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			logger, err := zap.NewProduction()
 			require.NoError(t, err)
-			handler, err := NewHandler(logger, testConfig.cacheMock)
+			handler, err := NewHandler(logger, testConfig.grpcMock)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.expectedMocks(t, testConfig.cacheMock)
+				testConfig.expectedMocks(t, testConfig.grpcMock)
 			}
 			rec, eCtx := setupRequest(t, "/all")
 			err = handler.GetAll(eCtx)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.cacheMock.AssertExpectations(t)
+				testConfig.grpcMock.AssertExpectations(t)
 			}
 			assert.Equal(t, testConfig.expectedStatusCode, rec.Code)
 			if testConfig.expectedStatusCode == http.StatusOK {
@@ -69,16 +69,16 @@ func TestGetAll(t *testing.T) {
 
 func TestListStories(t *testing.T) {
 	tests := map[string]struct {
-		cacheMock            *caching.Mock
-		expectedMocks        func(t *testing.T, cacheMock *caching.Mock)
+		grpcMock             *grpc.Mock
+		expectedMocks        func(t *testing.T, grpcMock *grpc.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
 		"Successfully ListStories": {
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
-			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, cachMock *caching.Mock) {
+			grpcMock:             &grpc.Mock{},
+			expectedMocks: func(t *testing.T, cachMock *grpc.Mock) {
 				cachMock.On("ListStories", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "story"},
 					{ID: 2, Type: "story"},
@@ -88,9 +88,9 @@ func TestListStories(t *testing.T) {
 		"Failed to get data": {
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
-			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
-				cacheMock.On("ListStories", context.TODO()).Return(nil, errors.New("Failed to find item"))
+			grpcMock:             &grpc.Mock{},
+			expectedMocks: func(t *testing.T, grpcMock *grpc.Mock) {
+				grpcMock.On("ListStories", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
 	}
@@ -98,18 +98,18 @@ func TestListStories(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			logger, err := zap.NewProduction()
 			require.NoError(t, err)
-			handler, err := NewHandler(logger, testConfig.cacheMock)
+			handler, err := NewHandler(logger, testConfig.grpcMock)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.expectedMocks(t, testConfig.cacheMock)
+				testConfig.expectedMocks(t, testConfig.grpcMock)
 			}
 			rec, eCtx := setupRequest(t, "/stories")
 			err = handler.ListStories(eCtx)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.cacheMock.AssertExpectations(t)
+				testConfig.grpcMock.AssertExpectations(t)
 			}
 			assert.Equal(t, testConfig.expectedStatusCode, rec.Code)
 			if testConfig.expectedStatusCode == http.StatusOK {
@@ -123,17 +123,17 @@ func TestListStories(t *testing.T) {
 
 func TestListJobs(t *testing.T) {
 	tests := map[string]struct {
-		cacheMock            *caching.Mock
-		expectedMocks        func(t *testing.T, cacheMock *caching.Mock)
+		grpcMock             *grpc.Mock
+		expectedMocks        func(t *testing.T, grpcMock *grpc.Mock)
 		expectedStatusCode   int
 		expectedResultLength int
 	}{
 		"Successfully ListJobs": {
 			expectedStatusCode:   200,
 			expectedResultLength: 2,
-			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
-				cacheMock.On("ListJobs", context.TODO()).Return([]*commonModel.Item{
+			grpcMock:             &grpc.Mock{},
+			expectedMocks: func(t *testing.T, grpcMock *grpc.Mock) {
+				grpcMock.On("ListJobs", context.TODO()).Return([]*commonModel.Item{
 					{ID: 1, Type: "job"},
 					{ID: 2, Type: "job"},
 				}, nil)
@@ -142,9 +142,9 @@ func TestListJobs(t *testing.T) {
 		"Failed to get data": {
 			expectedStatusCode:   500,
 			expectedResultLength: 0,
-			cacheMock:            &caching.Mock{},
-			expectedMocks: func(t *testing.T, cacheMock *caching.Mock) {
-				cacheMock.On("ListJobs", context.TODO()).Return(nil, errors.New("Failed to find item"))
+			grpcMock:             &grpc.Mock{},
+			expectedMocks: func(t *testing.T, grpcMock *grpc.Mock) {
+				grpcMock.On("ListJobs", context.TODO()).Return(nil, errors.New("Failed to find item"))
 			},
 		},
 	}
@@ -152,18 +152,18 @@ func TestListJobs(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			logger, err := zap.NewProduction()
 			require.NoError(t, err)
-			handler, err := NewHandler(logger, testConfig.cacheMock)
+			handler, err := NewHandler(logger, testConfig.grpcMock)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.expectedMocks(t, testConfig.cacheMock)
+				testConfig.expectedMocks(t, testConfig.grpcMock)
 			}
 			rec, eCtx := setupRequest(t, "/jobs")
 			err = handler.ListJobs(eCtx)
 			require.NoError(t, err)
 
 			if testConfig.expectedMocks != nil {
-				testConfig.cacheMock.AssertExpectations(t)
+				testConfig.grpcMock.AssertExpectations(t)
 			}
 			assert.Equal(t, testConfig.expectedStatusCode, rec.Code)
 			if testConfig.expectedStatusCode == http.StatusOK {

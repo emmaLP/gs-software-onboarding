@@ -4,31 +4,15 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"log"
 	"testing"
 	"time"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/caching"
-	"github.com/emmaLP/gs-software-onboarding/internal/config"
-	"github.com/emmaLP/gs-software-onboarding/internal/database"
-	"github.com/emmaLP/gs-software-onboarding/internal/model"
-	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
-	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
-)
+	"github.com/emmaLP/gs-software-onboarding/pkg/test"
 
-type testHandler struct {
-	logger      *zap.Logger
-	config      *model.Configuration
-	dbClient    database.Client
-	cacheClient caching.Client
-}
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestGrpcServer_ListStories(t *testing.T) {
 	story := commonModel.Item{
@@ -65,71 +49,29 @@ func TestGrpcServer_ListStories(t *testing.T) {
 
 	for testName, testConfig := range tests {
 		t.Run(testName, func(t *testing.T) {
-			handler := loadTestHandler(t)
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer cancel()
-			handler.cacheClient.FlushAll(ctx)
+			handler := test.LoadTestHandler(t, ctx)
+			handler.FlushCache(ctx)
 			for _, item := range testConfig.itemsToSave {
-				handler.saveItemToDatabase(t, item)
+				handler.SaveItemToDatabase(ctx, item)
 			}
 
-			grpcConnection, err := grpc.Dial(handler.address(), grpc.WithInsecure())
+			client, err := grpc.NewClient(handler.Config.Api.GrpcAddress, handler.Logger)
 			assert.NoError(t, err)
-			defer grpcConnection.Close()
+			defer client.Close()
 
-			client := pb.NewAPIClient(grpcConnection)
-
-			storiesSteam, err := client.ListStories(ctx, &emptypb.Empty{})
+			stories, err := client.ListStories(ctx)
 			assert.NoError(t, err)
-			assert.NotNil(t, storiesSteam)
+			assert.NotNil(t, stories)
 
-			for _, expectedItem := range testConfig.expectedResponse {
-				out, err := storiesSteam.Recv()
-				if err == nil {
-					actualItem := commonModel.PItemToItem(out)
-					assert.Equal(t, expectedItem, &actualItem)
-				} else {
-					t.Fatal("Unexpected error:", err)
-				}
-			}
-
-			lastRecv, err := storiesSteam.Recv()
-			log.Println(lastRecv)
-			assert.Equal(t, io.EOF, err)
+			assert.Len(t, stories, len(testConfig.expectedResponse))
+			assert.Equal(t, testConfig.expectedResponse, stories)
 
 			t.Cleanup(func() {
-				grpcConnection.Close()
-				handler.dbClient.CloseConnection(ctx)
-				handler.cacheClient.Close()
+				client.Close()
+				handler.CloseConnections(ctx)
 			})
 		})
 	}
-}
-
-func loadTestHandler(t *testing.T) *testHandler {
-	t.Helper()
-	conf, err := config.LoadConfig(".")
-	require.NoError(t, err)
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-	dbClient, err := database.New(context.TODO(), logger, &conf.Database)
-	require.NoError(t, err)
-	cacheClient, err := caching.New(context.TODO(), conf.Cache.Address, dbClient, logger, caching.WithTTL(10*time.Millisecond))
-	require.NoError(t, err)
-	return &testHandler{
-		logger:      logger,
-		config:      conf,
-		dbClient:    dbClient,
-		cacheClient: cacheClient,
-	}
-}
-
-func (h *testHandler) saveItemToDatabase(t *testing.T, item *commonModel.Item) {
-	t.Helper()
-	err := h.dbClient.SaveItem(context.TODO(), item)
-	require.NoError(t, err)
-}
-
-func (h *testHandler) address() string {
-	return fmt.Sprintf("%s:%d", "localhost", h.config.Grpc.Port)
 }
