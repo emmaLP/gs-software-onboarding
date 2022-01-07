@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
@@ -59,7 +58,7 @@ func New(ctx context.Context, logger *zap.Logger, config *model.DatabaseConfig) 
 		default:
 			err := client.Ping(ctx, readpref.Primary())
 			if err == nil {
-				log.Print("mongo is now connected")
+				logger.Info("mongo is now connected")
 				return database, nil
 			}
 		}

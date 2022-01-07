@@ -32,10 +32,12 @@ func main() {
 		logger.Fatal("Unable to create GRPC client.", zap.Error(err))
 	}
 	defer grpcClient.Close()
+	logger.Info("GRPC client connected to server")
 
 	server, err := api.NewServer(logger, grpcClient)
 	if err != nil {
 		logger.Fatal("Unable to instantiate api server", zap.Error(err))
 	}
+	logger.Debug("Starting api server")
 	server.StartServer(configuration.Api.Address)
 }
