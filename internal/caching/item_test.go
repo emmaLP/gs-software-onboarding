@@ -46,7 +46,7 @@ func TestListAll(t *testing.T) {
 	}
 	for testName, testConfig := range tests {
 		t.Run(testName, func(t *testing.T) {
-			logger, err := zap.NewProduction()
+			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
 			cacheClient, err := New(context.TODO(), redisServer.Addr(), testConfig.dbMock, logger, WithTTL(time.Minute))
 			require.NoError(t, err)
@@ -61,10 +61,8 @@ func TestListAll(t *testing.T) {
 			assert.Equal(t, testConfig.expectedItemsCount, len(items))
 
 			if !testConfig.fromCache {
-				// Clear the cache if testing pulling from the db
-				redisServer.FlushAll()
-				cacheClient, err = New(context.TODO(), redisServer.Addr(), testConfig.dbMock, logger, WithTTL(time.Minute))
-				require.NoError(t, err)
+				// Clear the cache if test pulling from the db
+				cacheClient.FlushAll(context.TODO())
 			}
 
 			items, err = cacheClient.ListAll(context.TODO())
@@ -75,7 +73,8 @@ func TestListAll(t *testing.T) {
 				testConfig.dbMock.AssertExpectations(t)
 			}
 			t.Cleanup(func() {
-				redisServer.FlushAll()
+				cacheClient.FlushAll(context.TODO())
+				cacheClient.Close()
 			})
 		})
 	}
@@ -113,7 +112,7 @@ func TestListStories(t *testing.T) {
 	}
 	for testName, testConfig := range tests {
 		t.Run(testName, func(t *testing.T) {
-			logger, err := zap.NewProduction()
+			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
 			cacheClient, err := New(context.TODO(), redisServer.Addr(), testConfig.dbMock, logger, WithTTL(time.Minute))
 			require.NoError(t, err)
@@ -128,10 +127,8 @@ func TestListStories(t *testing.T) {
 			assert.Equal(t, testConfig.expectedItemsCount, len(items))
 
 			if !testConfig.fromCache {
-				// Clear the cache if testing pulling from the db
-				redisServer.FlushAll()
-				cacheClient, err = New(context.TODO(), redisServer.Addr(), testConfig.dbMock, logger, WithTTL(time.Minute))
-				require.NoError(t, err)
+				// Clear the cache if test pulling from the db
+				cacheClient.FlushAll(context.TODO())
 			}
 
 			items, err = cacheClient.ListStories(context.TODO())
@@ -142,7 +139,8 @@ func TestListStories(t *testing.T) {
 				testConfig.dbMock.AssertExpectations(t)
 			}
 			t.Cleanup(func() {
-				redisServer.FlushAll()
+				cacheClient.FlushAll(context.TODO())
+				cacheClient.Close()
 			})
 		})
 	}
@@ -197,10 +195,8 @@ func TestListJobs(t *testing.T) {
 			assert.Equal(t, testConfig.expectedItemsCount, len(items))
 
 			if !testConfig.fromCache {
-				// Clear the cache if testing pulling from the db
-				redisServer.FlushAll()
-				cacheClient, err = New(context.TODO(), redisServer.Addr(), testConfig.dbMock, logger, WithTTL(time.Minute))
-				require.NoError(t, err)
+				// Clear the cache if test pulling from the db
+				cacheClient.FlushAll(context.TODO())
 			}
 
 			items, err = cacheClient.ListJobs(context.TODO())
@@ -211,7 +207,8 @@ func TestListJobs(t *testing.T) {
 				testConfig.dbMock.AssertExpectations(t)
 			}
 			t.Cleanup(func() {
-				redisServer.FlushAll()
+				cacheClient.FlushAll(context.TODO())
+				cacheClient.Close()
 			})
 		})
 	}

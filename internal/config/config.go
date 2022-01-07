@@ -52,4 +52,5 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("workers", 5)
 
 	v.SetDefault("api_address", ":8080")
+	v.SetDefault("grpc_port", 9000)
 }

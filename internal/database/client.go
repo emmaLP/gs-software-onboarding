@@ -77,7 +77,7 @@ func (d *database) SaveItem(ctx context.Context, item *commonModel.Item) error {
 	if err != nil {
 		return fmt.Errorf("Unable to save item. %w", err)
 	}
-	d.logger.Info("Item %d saved successfully", zap.Int("ID", item.ID))
+	d.logger.Info("Item saved successfully", zap.Int("ID", item.ID))
 	return nil
 }
 

@@ -17,6 +17,7 @@ type Client interface {
 	ListStories(ctx context.Context) ([]*commonModel.Item, error)
 	ListJobs(ctx context.Context) ([]*commonModel.Item, error)
 	Close()
+	FlushAll(ctx context.Context)
 }
 
 type itemCache struct {
@@ -43,8 +44,7 @@ func New(ctx context.Context, redisAddr string, db database.Client, logger *zap.
 	})
 
 	cacheClient := cache.New(&cache.Options{
-		Redis:      ring,
-		LocalCache: cache.NewTinyLFU(1000, time.Minute),
+		Redis: ring,
 	})
 
 	_, err := ring.Ping(ctx).Result()
@@ -112,4 +112,9 @@ func (c *itemCache) Close() {
 	if err != nil {
 		c.logger.Error("Failed to close connection to database", zap.Error(err))
 	}
+}
+
+func (c *itemCache) FlushAll(ctx context.Context) {
+	c.logger.Debug("Flushing cache")
+	c.ringClient.FlushAll(ctx)
 }

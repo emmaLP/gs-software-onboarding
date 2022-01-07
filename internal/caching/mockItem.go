@@ -38,3 +38,7 @@ func find(args mock.Arguments) ([]*model.Item, error) {
 func (m *Mock) Close() {
 	// Do nothing as this is a mock
 }
+
+func (m *Mock) FlushAll(context.Context) {
+	// Do nothing as this is a mock
+}

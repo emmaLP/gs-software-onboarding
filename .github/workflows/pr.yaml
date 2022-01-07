@@ -15,7 +15,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test
-        run: go test ./... -coverprofile cover.out
+        run: go test -tags integration ./... -coverprofile cover.out
       - name: Vet
         run: go vet ./...
       - name: Quality Gate - Test Coverage

@@ -28,6 +28,24 @@ services:
       - BASE_URL=https://hacker-news.firebaseio.com/v0
     depends_on:
       - mongo
+  grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: grpc
+    ports:
+      - "9000:9000"
+    environment:
+      - GRPC_PORT=9000
+      - DATABASE_USERNAME=admin
+      - DATABASE_PASSWORD=admin
+      - DATABASE_HOST=mongo
+      - DATABASE_PORT=27017
+      - DATABASE_NAME=hackernews
+      - CACHE_ADDRESS=redis:6379
+    depends_on:
+      - mongo
+      - redis
   api:
     build:
       context: .
@@ -44,5 +62,5 @@ services:
       - DATABASE_NAME=hackernews
       - CACHE_ADDRESS=redis:6379
     depends_on:
-      - mongo
       - redis
+      - mongo

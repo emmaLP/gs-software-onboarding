@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/emmalp/gs-software-onboarding/pkg/grpc/proto";
+
+package hackernews;
+
+import "google/protobuf/empty.proto";
+
+service API {
+  rpc ListAll (google.protobuf.Empty) returns (stream Item) {}
+  rpc ListJobs (google.protobuf.Empty) returns (stream Item) {}
+  rpc ListStories (google.protobuf.Empty) returns (stream Item) {}
+}
+
+message Item {
+  int32 id = 1;
+  string type = 2;
+  string text = 3;
+  string url = 4 ;
+  int64  score = 5;
+  string title = 6;
+  int64  time = 7;
+  string created_by = 8;
+  bool dead = 9;
+  bool deleted = 10;
+}

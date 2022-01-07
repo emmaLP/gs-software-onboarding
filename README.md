@@ -39,4 +39,14 @@ The consumer will periodically run to seed a mongo database from the HackerNews 
 
 The api reads data from a mongo database and returns the necessary information based on the API path.
 
+#### GRPC
 
+The GRPC service support communication between services
+
+#### Updating the generated go files
+
+If you update the `.proto` then you need to run the following command:
+
+```bash
+make proto
+```
