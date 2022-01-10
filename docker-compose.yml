@@ -48,14 +48,10 @@ services:
       - RABBITMQ_USERNAME=test
       - RABBITMQ_PASSWORD=test1234!
       - RABBITMQ_QUEUE_NAME=items
-      - DATABASE_USERNAME=admin
-      - DATABASE_PASSWORD=admin
-      - DATABASE_HOST=mongo
-      - DATABASE_PORT=27017
-      - DATABASE_NAME=hackernews
+      - GRPC_ADDRESS=grpc:9000
     depends_on:
       - rabbitmq
-      - mongo
+      - grpc
   grpc:
     build:
       context: .

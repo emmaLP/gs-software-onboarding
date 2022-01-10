@@ -5,9 +5,16 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
+
+	"github.com/emmaLP/gs-software-onboarding/internal/consumer"
+	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
+
+	"github.com/emmaLP/gs-software-onboarding/internal/queue"
+
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/config"
-	"github.com/emmaLP/gs-software-onboarding/internal/consumer"
 	"github.com/emmaLP/gs-software-onboarding/internal/logging"
 	"go.uber.org/zap"
 )
@@ -17,7 +24,7 @@ func main() {
 	defer cancel()
 
 	go func() {
-		// handle interrupts and propagate the changes across the consumer pipeline
+		// handle interrupts and propagate the changes across the publisher pipeline
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt)
 		<-c
@@ -40,8 +47,34 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to load config", zap.Error(err))
 	}
-
-	if err := consumer.ConfigureCron(ctx, logger, configuration); err != nil {
-		logger.Fatal("Failed to configure the cron", zap.Error(err))
+	qClient, err := queue.New(logger, ctx, &configuration.RabbitMq)
+	if err != nil {
+		logger.Fatal("Failed to instantiate queue client", zap.Error(err))
 	}
+	defer qClient.CloseConnection()
+
+	grpcClient, err := grpc.NewClient(configuration.GrpcClient.GrpcAddress, logger)
+	if err != nil {
+		logger.Fatal("Unable to create GRPC client.", zap.Error(err))
+	}
+	defer grpcClient.Close()
+	logger.Info("GRPC client connected to server")
+	var wg sync.WaitGroup
+	itemChan := make(chan *commonModel.Item)
+
+	consumerClient := consumer.New(logger, grpcClient)
+	for i := 0; i < configuration.Consumer.NumberOfWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			consumerClient.ProcessMessages(ctx, itemChan)
+		}()
+	}
+
+	err = qClient.ReceiveMessage(itemChan)
+	if err != nil {
+		logger.Fatal("Unable to consumer messages from rabbitmq.", zap.Error(err))
+	}
+	close(itemChan)
+	wg.Wait()
 }
