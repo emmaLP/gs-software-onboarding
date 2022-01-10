@@ -68,7 +68,7 @@ func TestMethods(t *testing.T) {
 				testConfig.expectedMocks(t, testConfig.cacheMock)
 			}
 			handler := Handler{
-				ItemCache: testConfig.cacheMock,
+				itemCache: testConfig.cacheMock,
 			}
 			var err error
 			if testConfig.listAllServer != nil {

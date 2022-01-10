@@ -26,6 +26,7 @@ type APIClient interface {
 	ListAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (API_ListAllClient, error)
 	ListJobs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (API_ListJobsClient, error)
 	ListStories(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (API_ListStoriesClient, error)
+	SaveItem(ctx context.Context, in *Item, opts ...grpc.CallOption) (*ItemResponse, error)
 }
 
 type aPIClient struct {
@@ -132,6 +133,15 @@ func (x *aPIListStoriesClient) Recv() (*Item, error) {
 	return m, nil
 }
 
+func (c *aPIClient) SaveItem(ctx context.Context, in *Item, opts ...grpc.CallOption) (*ItemResponse, error) {
+	out := new(ItemResponse)
+	err := c.cc.Invoke(ctx, "/hackernews.API/SaveItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // APIServer is the server API for API service.
 // All implementations must embed UnimplementedAPIServer
 // for forward compatibility
@@ -139,6 +149,7 @@ type APIServer interface {
 	ListAll(*emptypb.Empty, API_ListAllServer) error
 	ListJobs(*emptypb.Empty, API_ListJobsServer) error
 	ListStories(*emptypb.Empty, API_ListStoriesServer) error
+	SaveItem(context.Context, *Item) (*ItemResponse, error)
 	mustEmbedUnimplementedAPIServer()
 }
 
@@ -154,6 +165,9 @@ func (UnimplementedAPIServer) ListJobs(*emptypb.Empty, API_ListJobsServer) error
 }
 func (UnimplementedAPIServer) ListStories(*emptypb.Empty, API_ListStoriesServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListStories not implemented")
+}
+func (UnimplementedAPIServer) SaveItem(context.Context, *Item) (*ItemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveItem not implemented")
 }
 func (UnimplementedAPIServer) mustEmbedUnimplementedAPIServer() {}
 
@@ -231,13 +245,36 @@ func (x *aPIListStoriesServer) Send(m *Item) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _API_SaveItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Item)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(APIServer).SaveItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hackernews.API/SaveItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(APIServer).SaveItem(ctx, req.(*Item))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // API_ServiceDesc is the grpc.ServiceDesc for API service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var API_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "hackernews.API",
 	HandlerType: (*APIServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SaveItem",
+			Handler:    _API_SaveItem_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "ListAll",

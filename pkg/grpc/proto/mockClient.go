@@ -97,6 +97,26 @@ func (mr *MockAPIClientMockRecorder) ListStories(ctx, in interface{}, opts ...in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListStories", reflect.TypeOf((*MockAPIClient)(nil).ListStories), varargs...)
 }
 
+// SaveItem mocks base method.
+func (m *MockAPIClient) SaveItem(ctx context.Context, in *Item, opts ...grpc.CallOption) (*ItemResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveItem", varargs...)
+	ret0, _ := ret[0].(*ItemResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SaveItem indicates an expected call of SaveItem.
+func (mr *MockAPIClientMockRecorder) SaveItem(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveItem", reflect.TypeOf((*MockAPIClient)(nil).SaveItem), varargs...)
+}
+
 // MockAPI_ListAllClient is a mock of API_ListAllClient interface.
 type MockAPI_ListAllClient struct {
 	ctrl     *gomock.Controller
@@ -529,6 +549,21 @@ func (m *MockAPIServer) ListStories(arg0 *emptypb.Empty, arg1 API_ListStoriesSer
 func (mr *MockAPIServerMockRecorder) ListStories(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListStories", reflect.TypeOf((*MockAPIServer)(nil).ListStories), arg0, arg1)
+}
+
+// SaveItem mocks base method.
+func (m *MockAPIServer) SaveItem(arg0 context.Context, arg1 *Item) (*ItemResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveItem", arg0, arg1)
+	ret0, _ := ret[0].(*ItemResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SaveItem indicates an expected call of SaveItem.
+func (mr *MockAPIServerMockRecorder) SaveItem(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveItem", reflect.TypeOf((*MockAPIServer)(nil).SaveItem), arg0, arg1)
 }
 
 // mustEmbedUnimplementedAPIServer mocks base method.

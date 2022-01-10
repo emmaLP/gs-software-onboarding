@@ -82,7 +82,7 @@ func TestMain(m *testing.M) {
 		}
 		defer cacheClient.Close()
 		grpcHandler := grpc.Handler{
-			ItemCache: cacheClient,
+			itemCache: cacheClient,
 		}
 		server := grpc.NewServer(configuration.Grpc.Port, logger, grpcHandler)
 		grpcServer, err := server.Start()
