@@ -21,15 +21,15 @@ RUN go mod download
 COPY ./cmd/ ./cmd/
 COPY ./internal/ ./internal/
 COPY ./pkg/ ./pkg/
-RUN GOOS=linux GOARCH=amd64 go build -o ./bin/consumer ./cmd/consumer
+RUN GOOS=linux GOARCH=amd64 go build -o ./bin/publisher ./cmd/publisher
 RUN GOOS=linux GOARCH=amd64 go build -o ./bin/api ./cmd/api
 RUN GOOS=linux GOARCH=amd64 go build -o ./bin/grpc ./cmd/grpc
 
-FROM scratch as consumer
+FROM scratch as publisher
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=user /scratchpasswd /etc/passwd
-COPY --from=build /code/bin/consumer .
-ENTRYPOINT ["./consumer"]
+COPY --from=build /code/bin/publisher .
+ENTRYPOINT ["./publisher"]
 
 FROM scratch as api
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt

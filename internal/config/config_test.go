@@ -29,10 +29,12 @@ func TestLoadConfig(t *testing.T) {
 		"Successfully load config from environmental variables": {
 			envVars: envVars,
 			expected: &model.Configuration{
+				Publisher: model.PublisherConfig{
+					BaseUrl:      "localhost:8000",
+					CronSchedule: "*/15 * * * *",
+				},
 				Consumer: model.ConsumerConfig{
-					BaseUrl:         "localhost:8000",
 					NumberOfWorkers: 5,
-					CronSchedule:    "*/15 * * * *",
 				},
 				Database: model.DatabaseConfig{
 					Username: "test_username",
@@ -44,22 +46,24 @@ func TestLoadConfig(t *testing.T) {
 				Api: model.APIConfig{
 					Address: ":8080",
 				},
-				Grpc: model.GrpcConfig{Port: 9000},
+				Grpc: model.GrpcServerConfig{Port: 9000},
 			},
 		},
 		"Successfully load config from file": {
 			filePath:  ".",
 			writeFile: true,
 			expected: &model.Configuration{
+				Publisher: model.PublisherConfig{
+					BaseUrl:      "localhost:8000",
+					CronSchedule: "*/15 * * * *",
+				},
 				Consumer: model.ConsumerConfig{
-					BaseUrl:         "localhost:8000",
 					NumberOfWorkers: 5,
-					CronSchedule:    "*/15 * * * *",
 				},
 				Api: model.APIConfig{
 					Address: ":8080",
 				},
-				Grpc: model.GrpcConfig{Port: 9000},
+				Grpc: model.GrpcServerConfig{Port: 9000},
 			},
 		},
 	}
