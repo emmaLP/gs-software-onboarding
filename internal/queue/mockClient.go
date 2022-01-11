@@ -18,7 +18,7 @@ func (m *Mock) SendMessage(item commonModel.Item) error {
 	return nil
 }
 
-func (m *Mock) ReceiveMessage(msgChan chan commonModel.Item) error {
+func (m *Mock) ReceiveMessage(msgChan chan *commonModel.Item) error {
 	args := m.Called(msgChan)
 
 	err := args.Error(0)

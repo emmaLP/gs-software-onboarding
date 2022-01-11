@@ -57,7 +57,7 @@ func main() {
 	defer grpcClient.Close()
 	logger.Info("GRPC client connected to server")
 	var wg sync.WaitGroup
-	itemChan := make(chan commonModel.Item)
+	itemChan := make(chan *commonModel.Item)
 
 	consumerClient := consumer.New(logger, grpcClient)
 	for i := 0; i < configuration.Consumer.NumberOfWorkers; i++ {
