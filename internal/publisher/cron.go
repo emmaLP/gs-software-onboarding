@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/queue"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/model"
+	"github.com/emmaLP/gs-software-onboarding/internal/queue"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 )

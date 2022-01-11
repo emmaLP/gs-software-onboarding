@@ -4,9 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emmaLP/gs-software-onboarding/internal/database"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	pbMock "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

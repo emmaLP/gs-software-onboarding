@@ -5,17 +5,15 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
-
-	"github.com/emmaLP/gs-software-onboarding/internal/database"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
-
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	pbMock "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func TestListMethods(t *testing.T) {

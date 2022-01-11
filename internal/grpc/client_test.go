@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
-
 	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
