@@ -7,15 +7,12 @@ import (
 	"os/signal"
 	"sync"
 
+	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/consumer"
 	"github.com/emmaLP/gs-software-onboarding/internal/grpc"
-
-	"github.com/emmaLP/gs-software-onboarding/internal/queue"
-
-	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
-
-	"github.com/emmaLP/gs-software-onboarding/internal/config"
 	"github.com/emmaLP/gs-software-onboarding/internal/logging"
+	"github.com/emmaLP/gs-software-onboarding/internal/queue"
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +21,7 @@ func main() {
 	defer cancel()
 
 	go func() {
-		// handle interrupts and propagate the changes across the publisher pipeline
+		// handle interrupts and propagate the changes across the consumer pipeline
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt)
 		<-c
