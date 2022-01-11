@@ -2,7 +2,14 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
+
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
 	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
@@ -11,7 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMethods(t *testing.T) {
+func TestListMethods(t *testing.T) {
 	items := []*commonModel.Item{
 		{ID: 1, Type: "story"},
 		{ID: 2, Type: "job"},
@@ -106,6 +113,55 @@ func TestMethods(t *testing.T) {
 			assert.NoError(t, err)
 			if testConfig.expectedMocks != nil {
 				testConfig.cacheMock.AssertExpectations(t)
+			}
+		})
+	}
+}
+
+func TestHandler_SaveItem(t *testing.T) {
+	tests := map[string]struct {
+		dbMock             *database.Mock
+		itemToSave         *pbMock.Item
+		expectedMocks      func(t *testing.T, dbMock *database.Mock)
+		expectedErrMessage string
+	}{
+		"Successful save": {
+			dbMock:     &database.Mock{},
+			itemToSave: &pbMock.Item{Id: 1},
+			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+				dbMock.On("SaveItem", context.TODO(), mock.Anything).Return(nil)
+			},
+		},
+		"Unsuccessful save": {
+			dbMock:             &database.Mock{},
+			itemToSave:         &pbMock.Item{Id: 1},
+			expectedErrMessage: "Failed to save.",
+			expectedMocks: func(t *testing.T, dbMock *database.Mock) {
+				dbMock.On("SaveItem", context.TODO(), mock.Anything).Return(errors.New("Failed to save."))
+			},
+		},
+	}
+	for testName, testConfig := range tests {
+		t.Run(testName, func(t *testing.T) {
+			if testConfig.expectedMocks != nil {
+				testConfig.expectedMocks(t, testConfig.dbMock)
+			}
+			logger, err := zap.NewDevelopment()
+			require.NoError(t, err)
+
+			handler := NewHandler(nil, testConfig.dbMock, logger)
+			itemResponse, err := handler.SaveItem(context.TODO(), testConfig.itemToSave)
+			if testConfig.expectedErrMessage != "" {
+				assert.EqualErrorf(t, err, testConfig.expectedErrMessage, "Request failed should be: %v, got: %v", testConfig.expectedErrMessage, err)
+				assert.Equal(t, testConfig.itemToSave.Id, itemResponse.Id)
+				assert.False(t, itemResponse.Success)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, testConfig.itemToSave.Id, itemResponse.Id)
+				assert.True(t, itemResponse.Success)
+			}
+			if testConfig.expectedMocks != nil {
+				testConfig.dbMock.AssertExpectations(t)
 			}
 		})
 	}

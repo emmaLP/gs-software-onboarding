@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	commonModel "github.com/emmaLP/gs-software-onboarding/pkg/common/model"
+
 	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -225,6 +227,68 @@ func TestListJobs(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				assert.Len(t, allItems, testConfig.expectedNumItems)
+			}
+		})
+	}
+}
+
+func TestSaveItem(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	tests := map[string]struct {
+		grpcClient         *pb.MockAPIClient
+		itemToSave         *commonModel.Item
+		expectedMocks      func(t *testing.T, mock *pb.MockAPIClient)
+		expectedErrMessage string
+	}{
+		"Successfully SaveItem": {
+			grpcClient: pb.NewMockAPIClient(controller),
+			itemToSave: &commonModel.Item{ID: 1},
+			expectedMocks: func(t *testing.T, mock *pb.MockAPIClient) {
+				mock.EXPECT().SaveItem(gomock.Any(), gomock.Any()).Return(&pb.ItemResponse{
+					Id:      1,
+					Success: true,
+				}, nil)
+			},
+		},
+		"Error in grpc client": {
+			grpcClient:         pb.NewMockAPIClient(controller),
+			expectedErrMessage: "An error occurred while trying to save item. Failed to save",
+			itemToSave:         &commonModel.Item{ID: 2},
+			expectedMocks: func(t *testing.T, mock *pb.MockAPIClient) {
+				mock.EXPECT().SaveItem(gomock.Any(), gomock.Any()).Return(nil, errors.New("Failed to save"))
+			},
+		},
+		"Unsuccessful save": {
+			grpcClient:         pb.NewMockAPIClient(controller),
+			expectedErrMessage: "Something went wrong save item with id 3",
+			itemToSave:         &commonModel.Item{ID: 3},
+			expectedMocks: func(t *testing.T, mock *pb.MockAPIClient) {
+				mock.EXPECT().SaveItem(gomock.Any(), gomock.Any()).Return(&pb.ItemResponse{
+					Id:      3,
+					Success: false,
+				}, nil)
+			},
+		},
+	}
+	for testName, testConfig := range tests {
+		t.Run(testName, func(t *testing.T) {
+			logger, err := zap.NewDevelopment()
+			require.NoError(t, err)
+
+			c := client{
+				grpcClient: testConfig.grpcClient,
+				logger:     logger,
+			}
+			if testConfig.expectedMocks != nil {
+				testConfig.expectedMocks(t, testConfig.grpcClient)
+			}
+
+			err = c.SaveItem(context.TODO(), testConfig.itemToSave)
+			if strings.TrimSpace(testConfig.expectedErrMessage) != "" {
+				assert.EqualErrorf(t, err, testConfig.expectedErrMessage, "Request failed should be: %v, got: %v", testConfig.expectedErrMessage, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}

@@ -50,7 +50,7 @@ func (h *Handler) SaveItem(ctx context.Context, item *pb.Item) (*pb.ItemResponse
 	toItem := model.PItemToItem(item)
 	err := h.dbClient.SaveItem(ctx, &toItem)
 	if err != nil {
-		h.logger.Error("Failed to save item to the database", zap.Error(err))
+		h.logger.Error("Failed to save item to the database.", zap.Error(err))
 		return &pb.ItemResponse{Id: item.Id, Success: false}, err
 	}
 	return &pb.ItemResponse{Id: item.Id, Success: true}, nil
