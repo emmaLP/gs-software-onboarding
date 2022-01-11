@@ -21,7 +21,7 @@ type client struct {
 
 type Client interface {
 	SendMessage(item commonModel.Item) error
-	ReceiveMessage(msgChan chan *commonModel.Item) error
+	ReceiveMessage(msgChan chan commonModel.Item) error
 	CloseConnection()
 }
 
@@ -98,7 +98,7 @@ func (c *client) SendMessage(item commonModel.Item) error {
 	return err
 }
 
-func (c *client) ReceiveMessage(msgChan chan *commonModel.Item) error {
+func (c *client) ReceiveMessage(msgChan chan commonModel.Item) error {
 	messages, err := c.amqpChannel.Consume(
 		c.queue.Name,
 		"",
@@ -118,7 +118,7 @@ func (c *client) ReceiveMessage(msgChan chan *commonModel.Item) error {
 			c.logger.Error("Unable to unmarshal message body", zap.ByteString("message_body", message.Body), zap.Error(err))
 			continue
 		}
-		msgChan <- &item
+		msgChan <- item
 	}
 
 	return nil
