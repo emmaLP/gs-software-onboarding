@@ -27,8 +27,8 @@ func TestProcessMessages(t *testing.T) {
 				{ID: 1, Type: "story"}, {ID: 2, Type: "job"},
 			},
 			expectedMock: func(t *testing.T, mockGrpc *grpc.Mock) {
-				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 1, Type: "story"}).Return(nil)
-				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 2, Type: "job"}).Return(nil)
+				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 1, Type: "story"}).Return(nil).Once()
+				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 2, Type: "job"}).Return(nil).Once()
 			},
 		},
 		"Unable to save item": {
@@ -37,8 +37,8 @@ func TestProcessMessages(t *testing.T) {
 				{ID: 1, Type: "story"}, {ID: 2, Type: "job"},
 			},
 			expectedMock: func(t *testing.T, mockGrpc *grpc.Mock) {
-				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 1, Type: "story"}).Return(nil)
-				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 2, Type: "job"}).Return(errors.New("Fail."))
+				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 1, Type: "story"}).Return(nil).Once()
+				mockGrpc.On("SaveItem", context.TODO(), &model.Item{ID: 2, Type: "job"}).Return(errors.New("Fail.")).Once()
 			},
 			expectedErrMessage: "Failed to save item",
 		},
@@ -58,6 +58,8 @@ func TestProcessMessages(t *testing.T) {
 			}
 			service := New(logger, testConfig.mockGrpc)
 			testChan := make(chan *model.Item)
+			defer close(testChan)
+
 			// execute
 			go service.ProcessMessages(context.TODO(), testChan)
 
@@ -68,8 +70,6 @@ func TestProcessMessages(t *testing.T) {
 			if testConfig.expectedMock != nil {
 				testConfig.mockGrpc.AssertExpectations(t)
 			}
-
-			close(testChan)
 		})
 	}
 }
