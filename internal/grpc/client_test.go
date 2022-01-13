@@ -244,7 +244,7 @@ func TestSaveItem(t *testing.T) {
 			grpcClient: pb.NewMockAPIClient(controller),
 			itemToSave: &commonModel.Item{ID: 1},
 			expectedMocks: func(t *testing.T, mock *pb.MockAPIClient) {
-				mock.EXPECT().SaveItem(gomock.Any(), gomock.Any()).Return(&pb.ItemResponse{
+				mock.EXPECT().SaveItem(gomock.Eq(context.TODO()), gomock.Eq(&pb.Item{Id: 1})).Return(&pb.ItemResponse{
 					Id:      1,
 					Success: true,
 				}, nil)
@@ -255,7 +255,7 @@ func TestSaveItem(t *testing.T) {
 			expectedErrMessage: "An error occurred while trying to save item. Failed to save",
 			itemToSave:         &commonModel.Item{ID: 2},
 			expectedMocks: func(t *testing.T, mock *pb.MockAPIClient) {
-				mock.EXPECT().SaveItem(gomock.Any(), gomock.Any()).Return(nil, errors.New("Failed to save"))
+				mock.EXPECT().SaveItem(gomock.Eq(context.TODO()), gomock.Eq(&pb.Item{Id: 2})).Return(nil, errors.New("Failed to save"))
 			},
 		},
 		"Unsuccessful save": {
@@ -263,7 +263,7 @@ func TestSaveItem(t *testing.T) {
 			expectedErrMessage: "Something went wrong save item with id 3",
 			itemToSave:         &commonModel.Item{ID: 3},
 			expectedMocks: func(t *testing.T, mock *pb.MockAPIClient) {
-				mock.EXPECT().SaveItem(gomock.Any(), gomock.Any()).Return(&pb.ItemResponse{
+				mock.EXPECT().SaveItem(gomock.Eq(context.TODO()), gomock.Eq(&pb.Item{Id: 3})).Return(&pb.ItemResponse{
 					Id:      3,
 					Success: false,
 				}, nil)

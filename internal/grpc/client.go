@@ -80,7 +80,7 @@ func (c *client) SaveItem(ctx context.Context, item *model.Item) error {
 		return fmt.Errorf("An error occurred while trying to save item. %w", err)
 	}
 	if !itemResponse.Success {
-		return fmt.Errorf(fmt.Sprintf("Something went wrong save item with id %d", itemResponse.Id))
+		return fmt.Errorf("Something went wrong save item with id %d", itemResponse.Id)
 	}
 	return nil
 }

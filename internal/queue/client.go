@@ -68,12 +68,11 @@ func connect(ctx context.Context, logger *zap.Logger, amqpConfig *model.RabbitMq
 			return nil, fmt.Errorf("failed to connect to RabbitMQ: %v", ctx.Err())
 		default:
 			conn, err := amqp.Dial(amqpUrl)
-			if err == nil {
-				logger.Debug("Connected to rabbitMQ")
-				return conn, nil
-			} else {
+			if err != nil {
 				logger.Error("Unable to establish connection to RabbitMQ", zap.Error(err))
+				break
 			}
+			return conn, nil
 		}
 	}
 }
@@ -102,7 +101,7 @@ func (c *client) ReceiveMessage(msgChan chan *commonModel.Item) error {
 	messages, err := c.amqpChannel.Consume(
 		c.queue.Name,
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,
@@ -116,6 +115,10 @@ func (c *client) ReceiveMessage(msgChan chan *commonModel.Item) error {
 		err := json.Unmarshal(message.Body, &item)
 		if err != nil {
 			c.logger.Error("Unable to unmarshal message body", zap.ByteString("message_body", message.Body), zap.Error(err))
+			continue
+		}
+		if err := message.Ack(false); err != nil {
+			c.logger.Error("Unable to acknowledge message", zap.Error(err))
 			continue
 		}
 		msgChan <- &item

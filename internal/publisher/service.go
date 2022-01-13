@@ -64,7 +64,10 @@ func (s *service) publishItem(storyId int) {
 	item, err := s.hnClient.GetItem(storyId)
 	if err != nil {
 		s.logger.Error("An error occurred when trying to fetch the item.", zap.Error(err))
-	} else if !item.Deleted && !item.Dead {
+		return
+	}
+
+	if !item.Deleted && !item.Dead {
 		err := s.queueClient.SendMessage(*item)
 		if err != nil {
 			s.logger.Error("Failed to send item to queue", zap.Error(err))
