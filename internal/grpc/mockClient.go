@@ -23,6 +23,12 @@ func (m *Mock) ListJobs(ctx context.Context) ([]*model.Item, error) {
 	return handleCall(m.Called(ctx))
 }
 
+func (m *Mock) SaveItem(ctx context.Context, item *model.Item) error {
+	args := m.Called(ctx, item)
+
+	return args.Error(0)
+}
+
 func handleCall(args mock.Arguments) ([]*model.Item, error) {
 	itemsArgs, ok := args.Get(0).([]*model.Item)
 	if !ok {

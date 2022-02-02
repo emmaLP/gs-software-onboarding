@@ -9,10 +9,10 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/mitchellh/mapstructure v1.4.2
-	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/romnn/testcontainers v0.2.1
 	github.com/spf13/viper v1.9.0
+	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
 	github.com/testcontainers/testcontainers-go v0.12.0
 	go.mongodb.org/mongo-driver v1.8.0
@@ -62,6 +62,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.0.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/common v0.15.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect

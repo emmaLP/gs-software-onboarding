@@ -43,10 +43,8 @@ func main() {
 		logger.Fatal("Unexpected error when connecting to the cache.", zap.Error(err))
 	}
 	defer cacheClient.Close()
-	grpcHandler := grpc.Handler{
-		ItemCache: cacheClient,
-	}
-	server := grpc.NewServer(configuration.Grpc.Port, logger, grpcHandler)
+
+	server := grpc.NewServer(configuration.Grpc.Port, logger, grpc.NewHandler(cacheClient, databaseClient, logger))
 	logger.Debug("Starting grpc server")
 	grpcServer, err := server.Start()
 	if err != nil {

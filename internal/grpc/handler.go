@@ -1,38 +1,61 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	"github.com/emmaLP/gs-software-onboarding/pkg/common/model"
 	pb "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Handler struct {
 	pb.UnimplementedAPIServer
-	ItemCache caching.Client
+	itemCache caching.Client
+	dbClient  database.Client
+	logger    *zap.Logger
 }
 
-func (h Handler) ListAll(empty *emptypb.Empty, s pb.API_ListAllServer) error {
+func NewHandler(itemCache caching.Client, dbClient database.Client, logger *zap.Logger) *Handler {
+	return &Handler{
+		itemCache: itemCache,
+		dbClient:  dbClient,
+		logger:    logger,
+	}
+}
+
+func (h *Handler) ListAll(empty *emptypb.Empty, s pb.API_ListAllServer) error {
 	return h.streamItems(s, func() ([]*model.Item, error) {
-		return h.ItemCache.ListAll(s.Context())
+		return h.itemCache.ListAll(s.Context())
 	})
 }
 
-func (h Handler) ListStories(empty *emptypb.Empty, s pb.API_ListStoriesServer) error {
+func (h *Handler) ListStories(empty *emptypb.Empty, s pb.API_ListStoriesServer) error {
 	return h.streamItems(s, func() ([]*model.Item, error) {
-		return h.ItemCache.ListStories(s.Context())
+		return h.itemCache.ListStories(s.Context())
 	})
 }
 
-func (h Handler) ListJobs(empty *emptypb.Empty, s pb.API_ListJobsServer) error {
+func (h *Handler) ListJobs(empty *emptypb.Empty, s pb.API_ListJobsServer) error {
 	return h.streamItems(s, func() ([]*model.Item, error) {
-		return h.ItemCache.ListJobs(s.Context())
+		return h.itemCache.ListJobs(s.Context())
 	})
 }
 
-func (h Handler) streamItems(server interface{ Send(item *pb.Item) error }, itemsFunc func() ([]*model.Item, error)) error {
+func (h *Handler) SaveItem(ctx context.Context, item *pb.Item) (*pb.ItemResponse, error) {
+	toItem := model.PItemToItem(item)
+	err := h.dbClient.SaveItem(ctx, &toItem)
+	if err != nil {
+		h.logger.Error("Failed to save item to the database.", zap.Error(err))
+		return &pb.ItemResponse{Id: item.Id, Success: false}, err
+	}
+	return &pb.ItemResponse{Id: item.Id, Success: true}, nil
+}
+
+func (h *Handler) streamItems(server interface{ Send(item *pb.Item) error }, itemsFunc func() ([]*model.Item, error)) error {
 	items, err := itemsFunc()
 	if err != nil {
 		return fmt.Errorf("fetching all items, %w", err)

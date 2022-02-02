@@ -11,23 +11,47 @@ services:
       MONGO_INITDB_DATABASE: gymshark
       MONGODB_ADVERTISED_HOSTNAME: mongo-host
   redis:
-    image: "redis:alpine"
+    image: redis:alpine
     ports:
       - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: test
+      RABBITMQ_DEFAULT_PASS: test1234!
+  publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: publisher
+    environment:
+      - CRON=*/10 * * * *
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=test
+      - RABBITMQ_PASSWORD=test1234!
+      - RABBITMQ_QUEUE_NAME=items
+      - BASE_URL=https://hacker-news.firebaseio.com/v0
+    depends_on:
+      - rabbitmq
   consumer:
     build:
       context: .
       dockerfile: Dockerfile
       target: consumer
     environment:
-      - DATABASE_USERNAME=admin
-      - DATABASE_PASSWORD=admin
-      - DATABASE_HOST=mongo
-      - DATABASE_PORT=27017
-      - DATABASE_NAME=hackernews
-      - BASE_URL=https://hacker-news.firebaseio.com/v0
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=test
+      - RABBITMQ_PASSWORD=test1234!
+      - RABBITMQ_QUEUE_NAME=items
+      - GRPC_ADDRESS=grpc:9000
     depends_on:
-      - mongo
+      - rabbitmq
+      - grpc
   grpc:
     build:
       context: .

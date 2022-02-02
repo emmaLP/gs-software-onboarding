@@ -57,7 +57,7 @@ func TestGrpcServer_ListStories(t *testing.T) {
 				handler.SaveItemToDatabase(ctx, item)
 			}
 
-			client, err := grpc.NewClient(handler.Config.Api.GrpcAddress, handler.Logger)
+			client, err := grpc.NewClient(handler.Config.GrpcClient.GrpcAddress, handler.Logger)
 			assert.NoError(t, err)
 			defer client.Close()
 

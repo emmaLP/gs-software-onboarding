@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/emmaLP/gs-software-onboarding/internal/caching"
+	"github.com/emmaLP/gs-software-onboarding/internal/database"
 	pbMock "github.com/emmaLP/gs-software-onboarding/pkg/grpc/proto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -46,11 +47,8 @@ func TestStart(t *testing.T) {
 	}
 	for testName, testConfig := range tests {
 		t.Run(testName, func(t *testing.T) {
-			srv := Handler{
-				ItemCache: &caching.Mock{},
-			}
 			_ = pbMock.NewMockAPIServer(controller)
-			apiServer := NewServer(testConfig.port, logger, srv)
+			apiServer := NewServer(testConfig.port, logger, NewHandler(&caching.Mock{}, &database.Mock{}, logger))
 
 			if strings.TrimSpace(testConfig.expectedErrMessage) != "" {
 				_, err := apiServer.Start()

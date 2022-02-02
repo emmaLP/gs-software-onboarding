@@ -16,6 +16,7 @@ type Client interface {
 	ListAll(ctx context.Context) ([]*model.Item, error)
 	ListStories(ctx context.Context) ([]*model.Item, error)
 	ListJobs(ctx context.Context) ([]*model.Item, error)
+	SaveItem(ctx context.Context, item *model.Item) error
 }
 
 type client struct {
@@ -71,6 +72,17 @@ func (c *client) Close() {
 	if err != nil {
 		c.logger.Error("Unable to close connection", zap.Error(err))
 	}
+}
+
+func (c *client) SaveItem(ctx context.Context, item *model.Item) error {
+	itemResponse, err := c.grpcClient.SaveItem(ctx, model.ItemToPItem(*item))
+	if err != nil {
+		return fmt.Errorf("An error occurred while trying to save item. %w", err)
+	}
+	if !itemResponse.Success {
+		return fmt.Errorf("Something went wrong save item with id %d", itemResponse.Id)
+	}
+	return nil
 }
 
 func handleStreamItems(ctx context.Context, stream interface{ Recv() (*pb.Item, error) }) ([]*model.Item, error) {
